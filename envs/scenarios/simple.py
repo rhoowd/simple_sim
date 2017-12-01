@@ -16,14 +16,15 @@ Simple scenario
 
 import numpy as np
 # from multiagent.core import World, Agent, Landmark
+from envs.core import World
 from envs.scenario import BaseScenario
 
 
 class Scenario(BaseScenario):
     def make_world(self):
         print "make world"
-        return 0
-        # world = World()
+        world = World(1)
+        return world
         # # add agents
         # world.agents = [Agent() for i in range(1)]
         # for i, agent in enumerate(world.agents):

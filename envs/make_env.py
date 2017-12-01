@@ -42,7 +42,7 @@ def make_env(scenario_name):
 
     # create Simsim environment
     # env = Env(world, scenario.reset_world, scenario.reward, scenario.observation, scenario.target_move)
-    env = Env()
+    env = Env(world)
     return env
 
 

@@ -23,50 +23,35 @@ class Agent(object):
 
         print "Create Keyboard Agent"
         self._env = env
+        self._step = 0.1
 
     def learn(self):
         print "learn start"
-        pygame.init()
-        width = 80
-        height = 60
-        display = (width, height)
-        pygame.display.set_mode(display)
-        quit_flag = False
-        key_flag = False
         while True:
-            if quit_flag:
-                break
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit_flag = True
+            v = (0,0,0,0)
+            s = raw_input('action: ')
+            print s
+            if s =='a':
+                v = (0, -self._step, 0, 0)
+            elif s =='s':
+                v = (-self._step, 0, 0, 0)
+            elif s =='d':
+                v = (0, self._step, 0, 0)
+            elif s =='w':
+                v = (self._step, 0, 0, 0)
+            elif s =='q':
+                v = (0, 0, 0, -self._step)
+            elif s =='e':
+                v = (0, 0, 0, self._step)
+            elif s =='r':
+                v = (0, 0, self._step, 0)
+            elif s =='f':
+                v = (0, 0, -self._step, 0)
+            else:
+                print "wrong input"
+                continue
 
-                if event.type == KEYDOWN:
-                    key_flag = True
-                    if event.key == K_LEFT:
-                        action = "left"
-                    if event.key == K_RIGHT:
-                        action = "right"
-                    if event.key == K_UP:
-                        action = "up"
-                    if event.key == K_DOWN:
-                        action = "down"
-                    if event.key == ord('a'):
-                        action = "a"
-                    if event.key == ord('d'):
-                        action = "d"
-                    if event.key == ord('w'):
-                        action = "w"
-                    if event.key == ord('s'):
-                        action = "s"
-                    print action
-
-            if key_flag:
-                key_flag = False
-                obs_n, reward, done, info = self._env.step(action)
-                print obs_n, reward, done
-
-
+            self._env.step(v)
 
 
 

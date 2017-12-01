@@ -17,8 +17,9 @@ Environment Simsim
 
 class Env(object):
 
-    def __init__(self):
+    def __init__(self, world):
         print "Create Simsim Env"
+        self._world = world
 
     def step(self, action):
         """
@@ -33,6 +34,7 @@ class Env(object):
         """
         print "step", action
         # == Update world == #
+        self._world.step(action)
 
         # == Get observation == #
         obs = 0
