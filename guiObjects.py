@@ -66,3 +66,26 @@ class guiDrone():
         self.surface = pygame.Surface((self.sx, self.sy), pygame.SRCALPHA)
         self.surface = self.surface.convert_alpha()
 
+class guiCameraView():
+    def __init__(self, vx = 64, vy = 64, view_id = 0):
+        # Take initial dimensions of view screen
+        self.x = None
+        self.y = None
+        self.size = None
+        self.vx = vx
+        self.vy = vy
+        self.view_id = view_id
+        self.name = "view" + str(view_id)
+
+        # Label the camera view
+        self.fs = 15 # font size
+        self.font = pygame.font.SysFont(pygame.font.get_default_font(), self.fs)
+        self.text = "Drone " + str(view_id)
+        self.label = self.font.render(self.text, True, BLACK)
+
+    def setup(self, sx = 64, sy = 64):
+        # Set up camera view's surface
+        self.sx = sx
+        self.sy = sy
+        self.surface = pygame.Surface((self.sx, self.sy), pygame.SRCALPHA)
+        self.surface = self.surface.convert_alpha()
