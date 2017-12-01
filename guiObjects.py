@@ -22,6 +22,8 @@ class guiTarget():
         self.y = yi
         self.z = zi
         self.tr = tr
+        self.a = None # Not used
+        self.name = "target"
 
         # Label the target
         self.color = ORANGE
@@ -44,6 +46,7 @@ class guiDrone():
         self.y = yi
         self.z = zi
         self.a = ai
+        self.name = "drone" + str(drone_id)
 
         # Label the drone
         self.body_color = BLUE
