@@ -83,7 +83,7 @@ class guiCameraView():
         self.text = "Drone " + str(view_id)
         self.label = self.font.render(self.text, True, BLACK)
 
-    def setup(self, sx = 64, sy = 64):
+    def setup(self, sx = 128, sy = 128):
         # Set up camera view's surface
         self.sx = sx
         self.sy = sy

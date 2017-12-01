@@ -148,29 +148,29 @@ class TestServer(Thread):
                                         drone2 = {}
                                         drone3 = {}
                                         target = {}
-                                        drone1["x"] = 1277 + random.randint(-5, 5)
-                                        drone1["y"] = 987  + random.randint(-5, 5)
+                                        drone1["x"] = 903 + random.randint(-5, 5)
+                                        drone1["y"] = -592  + random.randint(-5, 5)
                                         drone1["z"] = 10 + random.randint(-1, 1)
                                         drone1["a"] = 245  + random.randint(-5, 5)
                                         drone1["center"] = (32+random.randint(-3, 3), 43+random.randint(-3,3))
                                         drone1["size"] = 3+random.randint(-1, 3)
 
-                                        drone2["x"] = 1432 + random.randint(-5, 5)
-                                        drone2["y"] = 1208 + random.randint(-5, 5)
+                                        drone2["x"] = -947 + random.randint(-5, 5)
+                                        drone2["y"] = -85 + random.randint(-5, 5)
                                         drone2["z"] = 10  + random.randint(-1, 1)
                                         drone2["a"] = 348 + random.randint(-5, 5)
                                         drone2["center"] = (15+random.randint(-3, 3), 50+random.randint(-3,3))
                                         drone2["size"] = 3+random.randint(-1, 3)
                                         
-                                        drone3["x"] = 1775 + random.randint(-5, 5)
-                                        drone3["y"] = 1309 + random.randint(-5, 5)
+                                        drone3["x"] = 811 + random.randint(-5, 5)
+                                        drone3["y"] = -458 + random.randint(-5, 5)
                                         drone3["z"] = 10 + random.randint(-1, 1)
                                         drone3["a"] = 58  + random.randint(-5, 5)
                                         drone3["center"] = (9+random.randint(-3, 3), 23+random.randint(-3,3))
                                         drone3["size"] = 3+random.randint(-1, 3)
                                         
-                                        target["x"] = 307  + random.randint(-5, 5)
-                                        target["y"] = 901  + random.randint(-5, 5)
+                                        target["x"] = 94  + random.randint(-5, 5)
+                                        target["y"] = -575  + random.randint(-5, 5)
                                         target["z"] = 0
                                         target["a"] = 0
 
