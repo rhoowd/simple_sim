@@ -35,34 +35,47 @@ class View(object):
         self._display = (self._width, self._height)
         pygame.display.set_mode(self._display, DOUBLEBUF | OPENGL)
 
-    def get_view(self):
+        self.fb = 0
+        self.lr = 0
+        self.ud = 0
+        self.a = 0
 
-        fb = 0.0
-        lr = -2.0
-        ud = 10
+
+    def get_view(self, action):
+
+        self.fb += action[0]
+        self.lr += action[1]
+        self.ud += action[2]
+        self.a += action[3]
+
         print "view step"
 
         # Camera angle: face upward 20 degree from vertical down
         glLoadIdentity()
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
         gluPerspective(45, (self._display[0] / self._display[1]), 0.1, 50.0)
+        glRotatef(10, 0, 1, 0)
+        glRotatef(self.a, 1, 0, 0)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
-        # Camera angle: face upward 20 degree from vertical down
-        glRotatef(-20, 1, 0, 0)
+        cam_x = self.lr
+        cam_y = self.fb
+        gluLookAt(cam_x,cam_y,10,cam_x,cam_y,0,0,1,0)
 
-        # Drone's yaw
-        glRotatef(90, 0, 1, 0)
-
-        # Drone position
-        glTranslatef(-lr, -fb, -ud)
-
-        # Target position
-        glTranslatef(0.0, 0.0, 0.0)
-
-
-
-
-        # glRotatef(20, 0, 0, 1)
+        # # Camera angle: face upward 20 degree from vertical down
+        # glRotatef(-20, 1, 0, 0)
         #
+        # # Drone's yaw
+        # glRotatef(90, 0, 1, 0)
+        #
+        # # Drone position
+        # glTranslatef(-lr, -fb, -ud)
+        #
+        # # Target position
+        # glTranslatef(0.0, 0.0, 0.0)
 
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -82,7 +95,7 @@ class View(object):
             print " "
 
         print " "
-        print " "
+        print self.fb, self.lr, self.ud, self.a
 
     def draw_target(self):
         glBegin(GL_QUADS)

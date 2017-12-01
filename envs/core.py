@@ -62,7 +62,7 @@ class Drone(Entity):
 
     def take_action(self, action, target):
 
-        self._view.view_step()
+        self._view.get_view(action)
 
 # multi-agent world
 class World(object):
