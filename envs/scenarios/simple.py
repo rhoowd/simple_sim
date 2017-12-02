@@ -40,7 +40,6 @@ class Scenario(BaseScenario):
         return world
 
     def reset_world(self, world):
-        print "!!!!! reset world"
         self._fail_cnt = [0] * self._n_drone
         world.reset()
         return 0
@@ -102,7 +101,6 @@ class Scenario(BaseScenario):
         return ret
 
     def done(self, drone, world):
-        print "!!!! done"
 
         if drone.get_obs()['t_x'] == -1:
             self._fail_cnt[drone.id] += 1
@@ -115,7 +113,6 @@ class Scenario(BaseScenario):
         return False
 
     def info(self, drone, world):
-        print "!!!! info"
         return 0
 
     def target_move(self, target, world):

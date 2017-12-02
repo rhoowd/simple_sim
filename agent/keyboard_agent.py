@@ -23,7 +23,7 @@ class Agent(object):
         self._env = env
         self._step = 0.5
         self._drone_id = 0
-        self._n_drone = 2
+        self._n_drone = 1
 
     def learn(self):
         print "learn start"
@@ -52,7 +52,7 @@ class Agent(object):
                 print "wrong input"
                 continue
             action[self._drone_id] = v
-            action[1] = v
+            # action[1] = v
             obs_n, reward_n, done_n, info_n = self._env.step(action)
             print "agent:", obs_n, reward_n, done_n
             if sum(done_n) == self._n_drone:
