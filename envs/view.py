@@ -15,98 +15,125 @@ Camera view from drone
 
 참고: http://blog.naver.com/PostView.nhn?blogId=samsjang&logNo=220717571305&categoryNo=81&parentCategoryNo=0&viewDate=&currentPage=1&postListTopCurrentPage=1&from=postView&userTopListOpen=true&userTopListCount=10&userTopListManageOpen=false&userTopListCurrentPage=1
 """
+
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import time
+import math
+import numpy as np
+import logging
+logger = logging.getLogger('Simsim.view')
 
 
 class View(object):
     def __init__(self):
-        self._color_red = (1,0,0)
-        self._surfaces = ((0,1,2,3), (3,2,7,6), (6,7,5,4),(4,5,1,0),(1,5,7,2),(4,0,3,6))
-        self._vertices = ((1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,-1),(1,-1,1),(1,1,1),(-1,-1,1),(-1,1,1))
-        self._edges = ((0,1), (0,3), (0,4),(2,1),(2,3),(2,7),(6,3),(6,4),(6,7),(5,1),(5,4),(5,7))
-        self._width = 80
-        self._height = 60
-
-        pygame.init()
+        self._width = 800
+        self._height = 600
         self._display = (self._width, self._height)
+        # phi: camera angle (front: 0, downward: 90, Bug for 90 -> recommend 89 for example)
+        self._phi = 45
+
+        # == init pygame to get image view == #
+        pygame.init()
         pygame.display.set_mode(self._display, DOUBLEBUF | OPENGL)
 
-        self.fb = 0
-        self.lr = 0
-        self.ud = 0
-        self.a = 0
+        # == Rendering flag:
+        # This module does not work when this flag is True for rendering image
+        self._render_flag = True
 
+    def get_view(self, dx, dy, dz, da, tx, ty):
+        """
+        Get the position of drone and target, and return result
+        (result: target's coordinate and size in the view)
+        The output coordination (0, 0) means target is located at left up in the view
 
-    def get_view(self, action):
+        :param dx: drone's position x
+        :param dy: drone's position y
+        :param dz: drone's position z
+        :param da: drone's position a
+        :param tx: target's position x
+        :param ty: target's position y
 
-        self.fb += action[0]
-        self.lr += action[1]
-        self.ud += action[2]
-        self.a += action[3]
+        :return obs is dict
+          - obs['t_x']: x coordinate of the center of the target
+          - obs['t_x']: y coordinate of the center of the target
+          - obs['t_w']: width of the target in the camera
+          - obs['t_h']: height of the target in the camera
+          - obs['size']: size of target (number of pixels of the target)
+          - obs['v_h']: resolution height
+          - obs['v_w']: resolution width
+        """
 
-        print "view step"
-
-        # Camera angle: face upward 20 degree from vertical down
+        # == Init opengl view == #
         glLoadIdentity()
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+        # == Set camera setting and position == #
         gluPerspective(45, (self._display[0] / self._display[1]), 0.1, 50.0)
-        glRotatef(10, 0, 1, 0)
-        glRotatef(self.a, 1, 0, 0)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
+        c_pos = [dx, dy, dz]
+        v_dir = [0]*3
+        v_dir[0] = math.sin(math.radians(da)) * math.cos(math.radians(self._phi))
+        v_dir[1] = math.cos(math.radians(da)) * math.cos(math.radians(self._phi))
+        v_dir[2] = -math.sin(math.radians(self._phi))
+        gluLookAt(c_pos[0], c_pos[1], c_pos[2], c_pos[0] + v_dir[0], c_pos[1] + v_dir[1], c_pos[2] + v_dir[2], 0, 0, 1)
 
-        cam_x = self.lr
-        cam_y = self.fb
-        gluLookAt(cam_x,cam_y,10,cam_x,cam_y,0,0,1,0)
+        # == Set target position == #
+        glTranslatef(tx, ty, 0.0)
 
-        # # Camera angle: face upward 20 degree from vertical down
-        # glRotatef(-20, 1, 0, 0)
-        #
-        # # Drone's yaw
-        # glRotatef(90, 0, 1, 0)
-        #
-        # # Drone position
-        # glTranslatef(-lr, -fb, -ud)
-        #
-        # # Target position
-        # glTranslatef(0.0, 0.0, 0.0)
-
-
+        # == Make image view for get result == #
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         self.draw_target()
-        pygame.display.flip()
-        # pygame.display.flip()  # need to call two times to update
+        if self._render_flag:
+            pygame.display.flip()
 
-        a = (GLubyte * (self._width * self._height))(0)
-        glReadPixels(0, 0, self._width, self._height, GL_RED, GL_UNSIGNED_BYTE, a)
+        # == Get image result from opengl view == #
+        view = (GLubyte * (self._width * self._height))(0)
+        glReadPixels(0, 0, self._width, self._height, GL_RED, GL_UNSIGNED_BYTE, view)
 
-        for i in range(self._height):
-            for j in range(self._width):
-                if a[(self._height-i-1) * self._width + j] > 0:
-                    print 1,
-                else:
-                    print 0,
-            print " "
+        # == Derive result (Target's coordinate and size in the view) ==#
+        image = np.asarray(view)
+        image = image.reshape([-1, self._width])
+        y, x = np.nonzero(image)
 
-        print " "
-        print self.fb, self.lr, self.ud, self.a
+        obs = dict()
+        obs['v_h'] = self._height
+        obs['v_w'] = self._width
+
+        if len(x) < 1:  # object not detected
+            logger.debug("object not detected")
+            obs['t_x'] = -1
+            obs['t_y'] = -1
+            obs['t_h'] = 0
+            obs['t_w'] = 0
+            obs['size'] = 0
+        else:
+            obs['t_x'] = (min(x) + max(x) + 1) / 2
+            obs['t_y'] = self._height - ((min(y) + max(y) + 1) / 2)
+            obs['t_h'] = max(x) - min(x) + 1
+            obs['t_w'] = max(y) - min(y) + 1
+            obs['size'] = np.count_nonzero(image)
+
+        return obs
 
     def draw_target(self):
+        """
+        Drawing target as red cube with size (1*1*1)
+        :return:
+        """
+        color_red = (1, 0, 0)
+        surfaces = ((0, 1, 2, 3), (3, 2, 7, 6), (6, 7, 5, 4), (4, 5, 1, 0), (1, 5, 7, 2), (4, 0, 3, 6))
+        vertices = ((1, -1, -1), (1, 1, -1), (-1, 1, -1), (-1, -1, -1), (1, -1, 1), (1, 1, 1), (-1, -1, 1), (-1, 1, 1))
+        edges = ((0, 1), (0, 3), (0, 4), (2, 1), (2, 3), (2, 7), (6, 3), (6, 4), (6, 7), (5, 1), (5, 4), (5, 7))
+
         glBegin(GL_QUADS)
-        for surface in self._surfaces:
+        for surface in surfaces:
             for vertex in surface:
-                glColor3fv(self._color_red)
-                glVertex3fv(self._vertices[vertex])
+                glColor3fv(color_red)
+                glVertex3fv(vertices[vertex])
         glEnd()
 
         glBegin(GL_LINES)
-        for edge in self._edges:
+        for edge in edges:
             for vertex in edge:
-                glVertex3fv(self._vertices[vertex])
+                glVertex3fv(vertices[vertex])
         glEnd()

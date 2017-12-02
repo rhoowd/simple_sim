@@ -9,8 +9,8 @@ if __name__ == '__main__':
 
     # === Logging setup === #
     logger = logging.getLogger('Simsim')
-    logger.setLevel(logging.INFO)
-    fh = logging.FileHandler('./drone.log')
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler('./simsim.log')
     sh = logging.StreamHandler()
     fm = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > [%(name)s] %(message)s')
     fh.setFormatter(fm)
@@ -26,17 +26,17 @@ if __name__ == '__main__':
     # result_fm = logging.Formatter('[%(filename)s:%(lineno)s] %(asctime)s\t%(message)s')
     # result_fh.setFormatter(result_fm)
     # result.addHandler(result_fh)
-    # === Program start === #
 
+    # === Program start === #
     logger.info("Simsim Start")
 
-    # Load env
-    env = make_env.make_env("simple")
+    # == Load env == #
+    env = make_env.make_env("simple", 1)
 
-    # Load agent
+    # == Load agent == #
     agent = agent.load("keyboard_agent.py").Agent(env)
 
-    # Run
+    # == Run == #
     agent.learn()
 
 

@@ -13,8 +13,6 @@
 
 Keyboard Agent
 """
-import pygame
-from pygame.locals import *
 
 
 class Agent(object):
@@ -23,35 +21,33 @@ class Agent(object):
 
         print "Create Keyboard Agent"
         self._env = env
-        self._step = 0.1
+        self._step = 0.5
+        self._drone_id = 0
 
     def learn(self):
         print "learn start"
+        action = dict()
         while True:
-            v = (0,0,0,0)
             s = raw_input('action: ')
-            print s
-            if s =='a':
+            if s == 'a':
                 v = (0, -self._step, 0, 0)
-            elif s =='s':
+            elif s == 's':
                 v = (-self._step, 0, 0, 0)
-            elif s =='d':
+            elif s == 'd':
                 v = (0, self._step, 0, 0)
-            elif s =='w':
+            elif s == 'w':
                 v = (self._step, 0, 0, 0)
-            elif s =='q':
+            elif s == 'q':
                 v = (0, 0, 0, -self._step)
-            elif s =='e':
+            elif s == 'e':
                 v = (0, 0, 0, self._step)
-            elif s =='r':
+            elif s == 'r':
                 v = (0, 0, self._step, 0)
-            elif s =='f':
+            elif s == 'f':
                 v = (0, 0, -self._step, 0)
             else:
                 print "wrong input"
                 continue
-
-            self._env.step(v)
-
-
-
+            action[self._drone_id] = v
+            obs_n, reward_n, done_n, info_n = self._env.step(action)
+            print obs_n

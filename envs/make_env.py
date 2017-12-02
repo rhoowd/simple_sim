@@ -24,11 +24,13 @@ communication actions in this array. See environment.py for more details.
 """
 
 
-def make_env(scenario_name):
+def make_env(scenario_name, n_drone=1):
     """
 
     :param scenario_name: name of the scenario from ./scenarios/ to be Returns
                           (without the .py extension)
+    :param n_drone: number of the drones in the world
+
     :return:
     """
     from envs.environment import Env
@@ -38,11 +40,11 @@ def make_env(scenario_name):
     scenario = scenarios.load(scenario_name + ".py").Scenario()
 
     # create world
-    world = scenario.make_world()
+    world = scenario.make_world(n_drone)
 
     # create Simsim environment
-    # env = Env(world, scenario.reset_world, scenario.reward, scenario.observation, scenario.target_move)
-    env = Env(world)
+    env = Env(world, scenario.reset_world, scenario.reward, scenario.observation, scenario.target_move)
+    # env = Env(world)
     return env
 
 

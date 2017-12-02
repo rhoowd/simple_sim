@@ -15,31 +15,17 @@ Simple scenario
 """
 
 import numpy as np
-# from multiagent.core import World, Agent, Landmark
 from envs.core import World
 from envs.scenario import BaseScenario
+import logging
+logger = logging.getLogger('Simsim.scenario')
 
 
 class Scenario(BaseScenario):
-    def make_world(self):
-        print "make world"
-        world = World(1)
+    def make_world(self, n_drone):
+        logger.debug("make world")
+        world = World(n_drone)
         return world
-        # # add agents
-        # world.agents = [Agent() for i in range(1)]
-        # for i, agent in enumerate(world.agents):
-        #     agent.name = 'agent %d' % i
-        #     agent.collide = False
-        #     agent.silent = True
-        # # add landmarks
-        # world.landmarks = [Landmark() for i in range(1)]
-        # for i, landmark in enumerate(world.landmarks):
-        #     landmark.name = 'landmark %d' % i
-        #     landmark.collide = False
-        #     landmark.movable = False
-        # # make initial conditions
-        # self.reset_world(world)
-        # return world
 
     def reset_world(self, world):
         return 0
@@ -59,18 +45,35 @@ class Scenario(BaseScenario):
         #     landmark.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
         #     landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent, world):
+    def reward(self, drone, world):
         return 0
         # dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos))
         # return -dist2 #np.exp(-dist2)
 
-    def observation(self, agent, world):
-        return 0
-        # # get positions of all entities in this agent's reference frame
-        # entity_pos = []
-        # for entity in world.landmarks:
-        #     entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # return np.concatenate([agent.state.p_vel] + entity_pos)
+    def observation(self, drone, world):
+        """
+        Drone's observation has 7 elements:
+          - obs['t_x']: x coordinate of the center of the target
+          - obs['t_x']: y coordinate of the center of the target
+          - obs['t_w']: width of the target in the camera
+          - obs['t_h']: height of the target in the camera
+          - obs['size']: size of target (number of pixels of the target)
+          - obs['v_h']: resolution height
+          - obs['v_w']: resolution width
 
-    def target_move(self, entity, world):
+        :param drone: drone object
+        :param world: world object
+        :return: array with t_x, t_y, and size
+        """
+        logger.debug(str(drone.obs))
+
+        obs = drone.obs
+        ret = list()
+        ret.append(obs['t_x'])
+        ret.append(obs['t_y'])
+        ret.append(obs['size'])
+
+        return ret
+
+    def target_move(self, target, world):
         return 0
