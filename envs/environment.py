@@ -15,6 +15,7 @@ Environment Simsim
 """
 import numpy as np
 import logging
+
 logger = logging.getLogger('Simsim.env')
 
 
@@ -67,33 +68,24 @@ class Env(object):
 
         return obs_n, reward_n, done_n, info_n
 
-    def _reset(self):
-        if self.reset_callback is None:
-            return 0
+    def reset(self):
         self.reset_callback(self._world)
-        return 0
 
     # get info used for benchmarking
     def _get_info(self, drone):
-        if self.info_callback is None:
-            return {}
         return self.info_callback(drone, self._world)
 
     # get observation for a particular agent
     def _get_obs(self, drone):
-        if self.observation_callback is None:
-            return np.zeros(0)
         return self.observation_callback(drone, self._world)
 
-    # get dones for a particular agent
+    # get done for a particular agent
     def _get_done(self, drone):
-        if self.done_callback is None:
-            return False
-        return self.observation_callback(drone, self._world)
+        return self.done_callback(drone, self._world)
 
     # get reward for a particular agent
     def _get_reward(self, drone):
-        if self.reward_callback is None:
-            return 0.0
         return self.reward_callback(drone, self._world)
 
+    def stop(self):
+        self._world.stop()

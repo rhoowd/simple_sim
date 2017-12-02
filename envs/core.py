@@ -15,6 +15,8 @@ Core module includes World
 """
 import math
 from view import View
+import envs.render as render
+from envs.config_env import Flags_e
 
 import logging
 logger = logging.getLogger('Simsim.core')
@@ -46,17 +48,32 @@ class Target(Entity):
     def __init__(self, e_id="target"):
         super(Target, self).__init__(e_id)
 
+    def reset_position(self):
+        """
+        Reset the position of target (0,0)
+
+        :return:
+        """
+        self._a = 0.0
+        self._x = 0.0
+        self._y = 0.0
+        self._z = 0.0
+
+    def move(self, dx, dy):
+        self._x += dx
+        self._y += dy
+
 
 class Drone(Entity):
-    def __init__(self, e_id, n_drone):
+    def __init__(self, e_id, n_drone, view):
         super(Drone, self).__init__(e_id)
         self._n_drone = n_drone
-        self._reset_position_radius = 10
-        self._view = View()
+        self._view = view
         self._obs = None
+        self._init_position_radius = Flags_e.init_position_radius
+        self._height_threshold = Flags_e.height_threshold
 
-    @property
-    def obs(self):
+    def get_obs(self):
         return self._obs
 
     def reset_position(self):
@@ -70,9 +87,9 @@ class Drone(Entity):
         :return:
         """
         self._a = 360.0/self._n_drone * self._id
-        self._x = -self._reset_position_radius * math.sin(math.radians(self._a))
-        self._y = -self._reset_position_radius * math.cos(math.radians(self._a))
-        self._z = self._reset_position_radius
+        self._x = -self._init_position_radius * math.sin(math.radians(self._a))
+        self._y = -self._init_position_radius * math.cos(math.radians(self._a))
+        self._z = self._init_position_radius
 
     def take_action(self, action):
         """
@@ -91,8 +108,11 @@ class Drone(Entity):
         self._x += lr * math.cos(math.radians(self._a))
         self._y += -lr * math.sin(math.radians(self._a))
         # Update ud, a
-        self._z += ud
         self._a += da
+        self._z += ud
+        # Drone cannot fly below height threshold
+        if self._z < self._height_threshold:
+            self._z = self._height_threshold
 
     def update_obs_from_view(self, target):
         """
@@ -108,44 +128,83 @@ class Drone(Entity):
 
 # multi-agent world
 class World(object):
-    def __init__(self, n_drone=1):
+    def __init__(self, n_drone=1, target_movement_callback=None):
 
         self._n_drone = n_drone
         self._target = Target()
         self._drones = []
+        self._view = View()
+        self.target_movement = target_movement_callback
 
         # == Create drones instance == #
         for i in range(n_drone):
-            self._drones.append(Drone(i, self._n_drone))
+            self._drones.append(Drone(i, self._n_drone, self._view))
 
         # == Initiate the position of drone == #
         for drone in self._drones:
             drone.reset_position()
 
+        # == Initiate rendering on canvas == #
+        self._render_flag = Flags_e.gui_flag
+        if self._render_flag:
+            self._render = render.Render()
+            self._render.start()
+            self._render_cnt = 0
+
     @property
     def n_drone(self):
         return self._n_drone
 
-    # return all entities in the world
-    def get_entities(self):
-        return self._drones + self._targets
+    def get_target(self):
+        """
+        :return: return target object
+        """
+        return self._target
 
-    # return all agents controllable by external policies
-    def get_targets(self):
-        return self._targets
-
-    # return all agents controlled by world scripts
     def get_drones(self):
+        """
+        :return: return all drones
+        """
         return self._drones
 
-    # update state of the world
     def step(self, action_n):
+        """
+        Update state of the world in following sequence
+         1. Update target's position
+         2. Update drones' position
+         3. Update drones' observation
+         4. Rendering on canvas
+
+        :param action_n: actions of drones
+        :return:
+        """
         logger.debug("World Step " + str(action_n))
 
         # == set action for target
+        dx, dy = self.target_movement(self._target, self)
+        self._target.move(dx, dy)
 
         # == Take actions and update observation for each drone == #
         for drone_id, action in action_n.iteritems():
             self._drones[drone_id].take_action(action)
             self._drones[drone_id].update_obs_from_view(self._target)
 
+        # == Rendering == #
+        if self._render_flag:
+            self._render_cnt += 1
+            if self._render_flag == Flags_e.gui_timestep:
+                self._render_cnt = 0
+                self._render.render(self)
+
+    def reset(self):
+        """
+        Reset the world. Reset the position of drones and target
+        :return:
+        """
+        self._target.reset_position()
+        for drone in self._drones:
+            drone.reset_position()
+
+    def stop(self):
+        if self._render_flag:
+            self._render.stop()

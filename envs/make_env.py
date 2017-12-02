@@ -40,11 +40,11 @@ def make_env(scenario_name, n_drone=1):
     scenario = scenarios.load(scenario_name + ".py").Scenario()
 
     # create world
-    world = scenario.make_world(n_drone)
+    world = scenario.make_world(n_drone, scenario.target_move)
 
     # create Simsim environment
-    env = Env(world, scenario.reset_world, scenario.reward, scenario.observation, scenario.target_move)
-    # env = Env(world)
+    env = Env(world, scenario.reset_world, scenario.reward, scenario.observation, scenario.info, scenario.done)
+
     return env
 
 

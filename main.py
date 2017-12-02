@@ -3,6 +3,8 @@
 import logging
 import envs.make_env as make_env
 import agent
+from envs.config_env import Flags_e
+
 
 
 if __name__ == '__main__':
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     logger.info("Simsim Start")
 
     # == Load env == #
-    env = make_env.make_env("simple", 1)
+    env = make_env.make_env(Flags_e.scenario, Flags_e.n_drone)
 
     # == Load agent == #
     agent = agent.load("keyboard_agent.py").Agent(env)
@@ -39,6 +41,5 @@ if __name__ == '__main__':
     # == Run == #
     agent.learn()
 
-
-
-
+    env.stop()
+    print "exit"

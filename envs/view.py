@@ -22,14 +22,15 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import math
 import numpy as np
+from envs.config_env import Flags_e
 import logging
 logger = logging.getLogger('Simsim.view')
 
 
 class View(object):
     def __init__(self):
-        self._width = 800
-        self._height = 600
+        self._width = Flags_e.view_width
+        self._height = Flags_e.view_height
         self._display = (self._width, self._height)
         # phi: camera angle (front: 0, downward: 90, Bug for 90 -> recommend 89 for example)
         self._phi = 45
@@ -38,9 +39,9 @@ class View(object):
         pygame.init()
         pygame.display.set_mode(self._display, DOUBLEBUF | OPENGL)
 
-        # == Rendering flag:
+        # == View rendering flag:
         # This module does not work when this flag is True for rendering image
-        self._render_flag = True
+        self._view_render_flag = Flags_e.view_render_flag
 
     def get_view(self, dx, dy, dz, da, tx, ty):
         """
@@ -83,7 +84,7 @@ class View(object):
         # == Make image view for get result == #
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         self.draw_target()
-        if self._render_flag:
+        if self._view_render_flag:
             pygame.display.flip()
 
         # == Get image result from opengl view == #

@@ -76,9 +76,9 @@ class Canvas():
         # --- Socket setup ---
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((HOST, PORT))
-        self.send({"src": "Canvas"})
-        sleep(1)
-        threading._start_new_thread(self.update_requester, ())
+        # self.send({"src": "Canvas"})  # by kdw
+        # sleep(1)
+        # threading._start_new_thread(self.update_requester, ())
 
         # --- JSON setup ---
         self.decoder = json.JSONDecoder()
@@ -149,15 +149,18 @@ class Canvas():
                 data = self.conn.recv(1024)
                 if data:
                     while data:
+                        print data
                         try:
                             j_msg, idx = self.decoder.raw_decode(data)
+                            print "!!==!!", j_msg, idx
                         except ValueError:
                             print("JSON Error")
 
                         if j_msg:
                             #print(j_msg["data"])
                             #print(str(j_msg), type(j_msg))
-                            print(j_msg["payload"]["data"])
+                            # print str(j_msg["payload"]["data"])
+                            print "!!!!", j_msg
                             
                             # --- update positions with socket-received data ---
                             update = j_msg["payload"]["data"]

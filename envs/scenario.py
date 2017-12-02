@@ -18,10 +18,9 @@ Environment Simsim
 # defines scenario upon which the world is built
 class BaseScenario(object):
     # create elements of the world
-    def make_world(self, n_drone):
+    def make_world(self, n_drone, target_move_callback):
         raise NotImplementedError()
 
-    # create initial conditions of the world
     def reset_world(self, world):
         raise NotImplementedError()
 
@@ -31,5 +30,12 @@ class BaseScenario(object):
     def observation(self, drone, world):
         raise NotImplementedError()
 
+    def info(self, drone, world):
+        raise NotImplementedError()
+
+    def done(self, drone, world):
+        raise NotImplementedError()
+
     def target_move(self, target, world):
         raise NotImplementedError()
+

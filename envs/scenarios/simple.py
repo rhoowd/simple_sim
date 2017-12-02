@@ -15,6 +15,8 @@ Simple scenario
 """
 
 import numpy as np
+import math
+import random
 from envs.core import World
 from envs.scenario import BaseScenario
 import logging
@@ -22,33 +24,57 @@ logger = logging.getLogger('Simsim.scenario')
 
 
 class Scenario(BaseScenario):
-    def make_world(self, n_drone):
+
+    def __init__(self):
+        self._n_drone = 0
+        self._fail_cnt = None
+        self._fail_threshold = 10
+
+    def make_world(self, n_drone, target_move_callback):
         logger.debug("make world")
-        world = World(n_drone)
+        world = World(n_drone, target_move_callback)
+
+        self._n_drone = n_drone
+        self._fail_cnt = [0] * self._n_drone
+
         return world
 
     def reset_world(self, world):
+        print "!!!!! reset world"
+        self._fail_cnt = [0] * self._n_drone
+        world.reset()
         return 0
-        # # random properties for agents
-        # for i, agent in enumerate(world.agents):
-        #     agent.color = np.array([0.25,0.25,0.25])
-        # # random properties for landmarks
-        # for i, landmark in enumerate(world.landmarks):
-        #     landmark.color = np.array([0.75,0.75,0.75])
-        # world.landmarks[0].color = np.array([0.75,0.25,0.25])
-        # # set random initial states
-        # for agent in world.agents:
-        #     agent.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
-        #     agent.state.p_vel = np.zeros(world.dim_p)
-        #     agent.state.c = np.zeros(world.dim_c)
-        # for i, landmark in enumerate(world.landmarks):
-        #     landmark.state.p_pos = np.random.uniform(-1,+1, world.dim_p)
-        #     landmark.state.p_vel = np.zeros(world.dim_p)
 
     def reward(self, drone, world):
-        return 0
-        # dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos))
-        # return -dist2 #np.exp(-dist2)
+        """
+        Drone's observation has 7 elements:
+          - obs['t_x']: x coordinate of the center of the target
+          - obs['t_x']: y coordinate of the center of the target
+          - obs['t_w']: width of the target in the camera
+          - obs['t_h']: height of the target in the camera
+          - obs['size']: size of target (number of pixels of the target)
+          - obs['v_h']: resolution height
+          - obs['v_w']: resolution width
+
+        :param drone: drone object
+        :param world: world object
+        :return: array with t_x, t_y, and size
+        """
+        obs = drone.get_obs()
+        if obs['t_x'] == -1:  # There is no target in the view
+            return 0
+
+        view_area = obs['v_w'] * obs['v_h']
+        distance_from_center = math.sqrt(math.pow(obs['t_x']-obs['v_w']/2, 2) + math.pow(obs['t_y']-obs['v_h']/2, 2))
+
+        ret = 0
+        if distance_from_center < obs['v_w'] * 0.15:
+            if view_area * 0.05 < obs['size'] < view_area * 0.2:
+                ret = 1
+        else:
+            ret = 0.1
+
+        return ret
 
     def observation(self, drone, world):
         """
@@ -65,9 +91,9 @@ class Scenario(BaseScenario):
         :param world: world object
         :return: array with t_x, t_y, and size
         """
-        logger.debug(str(drone.obs))
+        # logger.debug(str(drone.get_obs()))
 
-        obs = drone.obs
+        obs = drone.get_obs()
         ret = list()
         ret.append(obs['t_x'])
         ret.append(obs['t_y'])
@@ -75,5 +101,33 @@ class Scenario(BaseScenario):
 
         return ret
 
-    def target_move(self, target, world):
+    def done(self, drone, world):
+        print "!!!! done"
+
+        if drone.get_obs()['t_x'] == -1:
+            self._fail_cnt[drone.id] += 1
+        else:
+            self._fail_cnt[drone.id] = 0
+
+        if self._fail_cnt[drone.id] > self._fail_threshold:
+            return True
+
+        return False
+
+    def info(self, drone, world):
+        print "!!!! info"
         return 0
+
+    def target_move(self, target, world):
+        """
+        How to move the target for one step
+        :param target: target object
+        :param world:
+        :return: dx, dy - movement in x and y axis
+        """
+        max_speed = 0.3
+
+        dx = 2 * max_speed * (random.random() - 0.5)
+        dy = 2 * max_speed * (random.random() - 0.5)
+
+        return dx, dy
