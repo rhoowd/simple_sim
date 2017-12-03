@@ -46,6 +46,7 @@ class guiDrone():
         self.y = yi
         self.z = zi
         self.a = ai
+        self.drone_id = drone_id
         self.name = "drone" + str(drone_id)
 
         # Label the drone

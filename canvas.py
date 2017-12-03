@@ -15,7 +15,7 @@ import json
 import pygame
 
 from time import sleep
-from math import pi, sin, cos, sqrt
+from math import pi, sin, cos, sqrt, ceil, floor
 from guiObjects import guiTarget, guiDrone, guiCameraView
 
 # Make Canvas call get_pos() function of the drones
@@ -65,7 +65,7 @@ class Canvas():
         # vmargin: view-to-view margin
         self.vx = 128
         self.vy = 128
-        self.vmargin = 15
+        self.vmargin = 5
 
         # Correctors for intuitive viewing
         self.angle_corrector = 90
@@ -77,7 +77,7 @@ class Canvas():
         # --- Socket setup ---
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((HOST, PORT))
-        # self.send({"src": "Canvas"})  # by kdw
+        self.send({"src": "Canvas"})  # by kdw
         # sleep(1)
         # threading._start_new_thread(self.update_requester, ())
 
@@ -92,12 +92,12 @@ class Canvas():
         self.target_size_px = 20 # The size of the target in pixels
 
         try:
-            data = self.conn.recv(1024)
+            data = self.conn.recv(8192)
             if data:
                 while data:
                     try:
                         j_msg, idx = self.decoder.raw_decode(data)
-                        print(j_msg)
+                        #print(j_msg)
                     except ValueError:
                         print("JSON Error")
                         
@@ -115,13 +115,13 @@ class Canvas():
                                     self.target_cnt -= 1
 
                             if ("drone" in key):
-                                self.drone = guiDrone(update[key]["x"] + self.x_corrector, self.y_corrector - update[key]["y"], update[key]["z"], self.angle_corrector - update[key]["a"], int(key[-1]))
+                                self.drone = guiDrone(update[key]["x"] + self.x_corrector, self.y_corrector - update[key]["y"], update[key]["z"], self.angle_corrector - update[key]["a"], int(key.lstrip("drone")))
                                 self.drone.setup()
                                 self.guiObjectsList.append(self.drone)
 
                         for key in update:
                             if ("drone" in key):
-                                self.camera_view = guiCameraView(ci = update[key]["center"], si = int(sqrt(update[key]["size"])), view_id = int(key[-1]))
+                                self.camera_view = guiCameraView(ci = update[key]["center"], si = int(sqrt(update[key]["size"])), view_id = int(key.lstrip("drone")))
                                 self.camera_view.setup()
                                 self.guiObjectsList.append(self.camera_view)
                                     
@@ -130,16 +130,17 @@ class Canvas():
                 pass
         except (KeyboardInterrupt, SystemExit):
             raise
-
+        print(self.guiObjectsList)
     def recv_update(self):
         while not self.done:
             try:
-                data = self.conn.recv(1024)
+                data = self.conn.recv(8192)
                 if data:
                     while data:
-                        print data
+                        print data, len(data)
                         try:
                             j_msg, idx = self.decoder.raw_decode(data)
+                            print (j_msg)
                         except ValueError:
                             print("JSON Error")
 
@@ -215,7 +216,7 @@ class Canvas():
             # This is to accept asynchronous inputs from
             # (i) remote server and (ii) local keyboard input for zooming/panning.
             
-            self.target.surface.fill((255, 255, 255))
+            self.target.surface.fill((255, 255, 255, 128))
 
             # Merge the following two for loops later. Fill them all with white background.
             
@@ -294,15 +295,17 @@ class Canvas():
             for guiObject in self.guiObjectsList:
                 # Camera Views
                 if "view" in guiObject.name:
-                    self.display_surface.blit(guiObject.surface, (self.framex - guiObject.sx - self.vmargin, (guiObject.view_id+1)*self.vmargin + guiObject.view_id*guiObject.sy))
-                    
+                    grid_y = floor(self.framey/(guiObject.sy + self.vmargin))
+                    grid_x = int(ceil(self.num_drones/grid_y))
+                    #self.display_surface.blit(guiObject.surface, (self.framex - guiObject.sx - self.vmargin, (guiObject.view_id+1)*self.vmargin + guiObject.view_id*guiObject.sy))
+                    self.display_surface.blit(guiObject.surface, (int(self.framex - (guiObject.sx + self.vmargin)*(grid_x - floor(guiObject.view_id/grid_y))), int((guiObject.view_id%int(grid_y))*guiObject.sy + ((guiObject.view_id%int(grid_y))+1)*self.vmargin)))
 
 
             pygame.display.update()
             
         
 if __name__ == "__main__":
-    canvas = Canvas(1280, 720, 1)
+    canvas = Canvas(1900, 1000, 30)
     canvas.setup()
     canvas.run()
         
