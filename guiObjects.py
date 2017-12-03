@@ -67,11 +67,10 @@ class guiDrone():
         self.surface = self.surface.convert_alpha()
 
 class guiCameraView():
-    def __init__(self, vx = 64, vy = 64, view_id = 0):
-        # Take initial dimensions of view screen
-        self.x = None
-        self.y = None
-        self.size = None
+    def __init__(self, ci = (0, 0), si = 20, vx = 64, vy = 64, view_id = 0):
+        # Take initial dimensions of view screen and target position on camera view
+        self.center = ci
+        self.size = si
         self.vx = vx
         self.vy = vy
         self.view_id = view_id
@@ -87,5 +86,7 @@ class guiCameraView():
         # Set up camera view's surface
         self.sx = sx
         self.sy = sy
+        self.border_thickness = 5
+        self.border_color = (0, 0, 0, 128)
         self.surface = pygame.Surface((self.sx, self.sy), pygame.SRCALPHA)
         self.surface = self.surface.convert_alpha()

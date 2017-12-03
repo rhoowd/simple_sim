@@ -19,5 +19,5 @@ class Flags_e(object):
 
     # view
     view_render_flag = True
-    view_width = 800
-    view_height = 600
+    view_width = 64
+    view_height = 64

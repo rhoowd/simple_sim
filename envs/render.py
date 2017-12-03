@@ -70,7 +70,8 @@ class Render(Thread):
             drone_data["center"] = (obs['t_x'], obs['t_y'])
             drone_data["size"] = obs['size']
 
-            update_data["drone"+str(drone.id+1)] = drone_data
+            #update_data["drone"+str(drone.id+1)] = drone_data # kwj
+            update_data["drone"+str(drone.id)] = drone_data # Drones are now indexed from 0
 
         target_position = world.get_target().get_position()
         update_data['target'] = dict()
