@@ -42,7 +42,10 @@ class Canvas():
         self.clock = pygame.time.Clock()
         self.display_surface = pygame.display.set_mode((wx, wy))
         pygame.display.set_caption("Sim Sim")
-        self.movable_surface = self.display_surface.copy()
+        #self.movable_surface = self.display_surface.copy()
+        self.movable_surface = pygame.Surface((wx*2, wy*2))
+        self.mx = self.movable_surface.get_width()
+        self.my = self.movable_surface.get_height()
         self.done = False
 
         # --- Diplay screen resolution ---
@@ -51,8 +54,8 @@ class Canvas():
         self.framey = wy
 
         # Movable surface is variable
-        self.wx = wx
-        self.wy = wy
+        self.wx = self.mx
+        self.wy = self.my
         self.zoom_sensitivity = 1.02 # Change this to zoom faster
         self.pan_sensitivity = 5 # Change this to move screen faster
         self.sx = 0
@@ -82,8 +85,8 @@ class Canvas():
 
         # Correctors for intuitive viewing
         self.angle_corrector = 90
-        self.x_corrector = self.framex/2
-        self.y_corrector = self.framey/2
+        self.x_corrector = self.mx/2
+        self.y_corrector = self.my/2
         self.cam_view_scaler = 2
         
     def setup(self):
@@ -268,18 +271,16 @@ class Canvas():
                         self.wy /= self.zoom_sensitivity
 
             pressed = pygame.key.get_pressed()
-            # if pressed[pygame.K_w]: self.sy += self.pan_sensitivity
-            # if pressed[pygame.K_s]: self.sy -= self.pan_sensitivity
-            # if pressed[pygame.K_a]: self.sx += self.pan_sensitivity
-            # if pressed[pygame.K_d]: self.sx -= self.pan_sensitivity
-
-            if pressed[pygame.K_w]: self.ty += self.pan_sensitivity
-            if pressed[pygame.K_s]: self.ty -= self.pan_sensitivity
-            if pressed[pygame.K_a]: self.tx += self.pan_sensitivity
-            if pressed[pygame.K_d]: self.tx -= self.pan_sensitivity
-
+            if pressed[pygame.K_w]: self.sy += self.pan_sensitivity
+            if pressed[pygame.K_s]: self.sy -= self.pan_sensitivity
+            if pressed[pygame.K_a]: self.sx += self.pan_sensitivity
+            if pressed[pygame.K_d]: self.sx -= self.pan_sensitivity
+        
+            # if pressed[pygame.K_w]: self.ty += self.pan_sensitivity
+            # if pressed[pygame.K_s]: self.ty -= self.pan_sensitivity
+            # if pressed[pygame.K_a]: self.tx += self.pan_sensitivity
+            # if pressed[pygame.K_d]: self.tx -= self.pan_sensitivity
             
-
             # --- Fill background ---
             self.display_surface.fill(GREY)
             self.movable_surface.fill((255, 255, 255, 0))
@@ -331,8 +332,8 @@ class Canvas():
                     self.make_border(obj)
 
             # Re-draw center mark
-            pygame.draw.line(self.movable_surface, GREEN, (self.framex/2 - self.center_mark_size_px, self.framey/2), (self.framex/2 + self.center_mark_size_px, self.framey/2), self.center_mark_thickness_px)
-            pygame.draw.line(self.movable_surface, GREEN, (self.framex/2, self.framey/2 - self.center_mark_size_px), (self.framex/2, self.framey/2 + self.center_mark_size_px), self.center_mark_thickness_px)
+            pygame.draw.line(self.movable_surface, GREEN, (self.mx/2 - self.center_mark_size_px, self.my/2), (self.mx/2 + self.center_mark_size_px, self.my/2), self.center_mark_thickness_px)
+            pygame.draw.line(self.movable_surface, GREEN, (self.mx/2, self.my/2 - self.center_mark_size_px), (self.mx/2, self.my/2 + self.center_mark_size_px), self.center_mark_thickness_px)
 
             # --- Canvas update ---
             # Re-drawing is called "blitting"!

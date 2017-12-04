@@ -22,7 +22,7 @@ from select import select
 import random # for garbage data generation
 
 config = ConfigParser.ConfigParser()
-config.read("params.cfg")
+config.read("../params.cfg")
 
 num_drones = config.getint("CanvasParams", "num_drones")
 HOST = config.get("CanvasParams", "host")
