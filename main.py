@@ -20,7 +20,8 @@ if __name__ == '__main__':
 
     # Load agent
     logger_agent.info("Agent")
-    agent = agent.load("naive/naive.py").Agent(env)
+    agent = agent.load("ddpg/ddpg.py").Agent(env)
+    # agent = agent.load("naive/naive.py").Agent(env)
     # agent = agent.load("keyboard_agent.py").Agent(env)
 
     # Start run
