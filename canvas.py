@@ -13,16 +13,19 @@ import socket
 import threading
 import json
 import pygame
+import ConfigParser
 
 from time import sleep
 from math import pi, sin, cos, sqrt, ceil, floor
 from guiObjects import guiTarget, guiDrone, guiCameraView
 
-# Make Canvas call get_pos() function of the drones
-# Use the return values to draw the target and the drones
-
-HOST = "localhost"
-PORT = 23456
+config = ConfigParser.ConfigParser()
+config.read("config.cfg")
+num_drones = config.getint("CanvasParams", "num_drones")
+HOST = config.get("CanvasParams", "host")
+PORT = config.getint("CanvasParams", "port")
+resolution = (config.getint("CanvasParams", "resolutionx"), config.getint("CanvasParams", "resolutiony"))
+print resolution, type(resolution[0]), type(resolution[1])
 
 GREY = (25, 25, 25, 128)
 WHITE = (255, 255, 255, 0)
@@ -71,6 +74,7 @@ class Canvas():
         self.angle_corrector = 90
         self.x_corrector = self.framex/2
         self.y_corrector = self.framey/2
+        self.cam_view_scaler = 2
         
     def setup(self):
         
@@ -155,7 +159,8 @@ class Canvas():
                                     obj.z = update[str(obj.name)]["z"]
                                     obj.a = self.angle_corrector - update[str(obj.name)]["a"]
                                 if ("view" in obj.name):
-                                    obj.center = update["drone"+str(obj.name[-1])]["center"]
+                                    obj.center[0] = int(update["drone"+str(obj.name[-1])]["center"][0]*self.cam_view_scaler)
+                                    obj.center[1] = int(update["drone"+str(obj.name[-1])]["center"][1]*self.cam_view_scaler)
                                     obj.size = update["drone"+str(obj.name[-1])]["size"]
                             
                         data = data[idx:].lstrip()
@@ -305,7 +310,7 @@ class Canvas():
             
         
 if __name__ == "__main__":
-    canvas = Canvas(1900, 1000, 30)
+    canvas = Canvas(int(resolution[0]), int(resolution[1]), num_drones)
     canvas.setup()
     canvas.run()
         
