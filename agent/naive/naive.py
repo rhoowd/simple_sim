@@ -13,34 +13,19 @@
 
 Choose action based on deterministic policy
 """
+from agent.agent import AgentBase
 import logging
-import envs
-import numpy as np
-logger = logging.getLogger("Agent.naive")
+
+logger = logging.getLogger("Agent")
 
 
-class Agent(object):
+class Agent(AgentBase):
 
     def __init__(self, env):
+        super(Agent, self).__init__(env)
         logger.info("Naive agent is created")
-        self._env = env
-        self._n_drone = env.n_drone
 
-        self._obs_dim = self._env.get_obs_dim()
-        self._action_dim = self._env.get_action_dim()
-        self._action_max = self._env.get_action_max()
-        self._action_min = self._env.get_action_min()
-
-    def act_n(self, obs_n, step):
-        action_n = dict()
-        for drone_id in range(self._n_drone):
-            action_n[drone_id] = self.act(obs_n[drone_id], step)
-
-        logger.debug("Action: " + str(action_n))
-
-        return action_n
-
-    def act(self, obs, step):
+    def _act(self, obs, step):
 
         x_pos = obs[0]
         y_pos = obs[1]
@@ -75,7 +60,6 @@ class Agent(object):
 
         return v_fb, v_lr, v_ud, 0
 
-
     def learn(self, train=True):
         """
         Learn
@@ -93,7 +77,7 @@ class Agent(object):
             step += 1
 
             # == Get action == #
-            action_n = self.act_n(obs_n, step)
+            action_n = self._act_n(obs_n, step)
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)
