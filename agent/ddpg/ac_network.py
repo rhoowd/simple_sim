@@ -4,9 +4,7 @@
 import numpy as np
 import tensorflow as tf
 from collections import deque
-import config
 import random
-import tensorflow.contrib.slim as slim
 
 gamma = 0.99  # reward discount factor
 
@@ -120,8 +118,7 @@ class ActorNetwork:
         return actions
 
     def action_for_state(self, state_ph):
-        print state_ph.shape
-            return self.sess.run(self.actions,
+        return self.sess.run(self.actions,
                              feed_dict={self.state_ph: state_ph/10, self.is_training_ph: False})
 
     def target_action_for_next_state(self, next_state_ph):
