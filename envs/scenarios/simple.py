@@ -46,29 +46,34 @@ class Scenario(BaseScenario):
 
     def reward(self, drone, world):
         """
-        Drone's observation has 7 elements:
-          - obs['t_x']: x coordinate of the center of the target
-          - obs['t_x']: y coordinate of the center of the target
-          - obs['t_w']: width of the target in the camera
-          - obs['t_h']: height of the target in the camera
-          - obs['size']: size of target (number of pixels of the target)
-          - obs['v_h']: resolution height
-          - obs['v_w']: resolution width
+        Drone's observation has 11 elements:
+          - obs['drone']['v_fb']: velocity for forward/backward
+          - obs['drone']['v_lr']: velocity for left/right
+          - obs['drone']['v_ud']: velocity for up/down
+          - obs['drone']['v_a']: Angular rate
+
+          - obs['view']['t_x']: x coordinate of the center of the target
+          - obs['view']['t_x']: y coordinate of the center of the target
+          - obs['view']['t_w']: width of the target in the camera
+          - obs['view']['t_h']: height of the target in the camera
+          - obs['view']['size']: size of target (number of pixels of the target)
+          - obs['view']['v_h']: resolution height
+          - obs['view']['v_w']: resolution width
 
         :param drone: drone object
         :param world: world object
         :return: array with t_x, t_y, and size
         """
         obs = drone.get_obs()
-        if obs['t_x'] == -1:  # There is no target in the view
+        if obs['view']['t_x'] == -1:  # There is no target in the view
             return 0
 
-        view_area = obs['v_w'] * obs['v_h']
-        distance_from_center = math.sqrt(math.pow(obs['t_x']-obs['v_w']/2, 2) + math.pow(obs['t_y']-obs['v_h']/2, 2))
+        view_area = obs['view']['v_w'] * obs['view']['v_h']
+        distance_from_center = math.sqrt(math.pow(obs['view']['t_x']-obs['view']['v_w']/2, 2) + math.pow(obs['view']['t_y']-obs['view']['v_h']/2, 2))
 
         ret = 0
-        if distance_from_center < obs['v_w'] * 0.15:
-            if view_area * 0.05 < obs['size'] < view_area * 0.2:
+        if distance_from_center < obs['view']['v_w'] * 0.15:
+            if view_area * 0.05 < obs['view']['size'] < view_area * 0.2:
                 ret = 1
         else:
             ret = 0.1
@@ -77,14 +82,19 @@ class Scenario(BaseScenario):
 
     def observation(self, drone, world):
         """
-        Drone's observation has 7 elements:
-          - obs['t_x']: x coordinate of the center of the target
-          - obs['t_x']: y coordinate of the center of the target
-          - obs['t_w']: width of the target in the camera
-          - obs['t_h']: height of the target in the camera
-          - obs['size']: size of target (number of pixels of the target)
-          - obs['v_h']: resolution height
-          - obs['v_w']: resolution width
+        Drone's observation has 11 elements:
+          - obs['drone']['v_fb']: velocity for forward/backward
+          - obs['drone']['v_lr']: velocity for left/right
+          - obs['drone']['v_ud']: velocity for up/down
+          - obs['drone']['v_a']: Angular rate
+
+          - obs['view']['t_x']: x coordinate of the center of the target
+          - obs['view']['t_x']: y coordinate of the center of the target
+          - obs['view']['t_w']: width of the target in the camera
+          - obs['view']['t_h']: height of the target in the camera
+          - obs['view']['size']: size of target (number of pixels of the target)
+          - obs['view']['v_h']: resolution height
+          - obs['view']['v_w']: resolution width
 
         :param drone: drone object
         :param world: world object
@@ -94,15 +104,15 @@ class Scenario(BaseScenario):
 
         obs = drone.get_obs()
         ret = list()
-        ret.append(obs['t_x'])
-        ret.append(obs['t_y'])
-        ret.append(obs['size'])
+        ret.append(obs['view']['t_x'])
+        ret.append(obs['view']['t_y'])
+        ret.append(obs['view']['size'])
 
         return ret
 
     def done(self, drone, world):
 
-        if drone.get_obs()['t_x'] == -1:
+        if drone.get_obs()['view']['t_x'] == -1:
             self._fail_cnt[drone.id] += 1
         else:
             self._fail_cnt[drone.id] = 0
@@ -122,7 +132,7 @@ class Scenario(BaseScenario):
         :param world:
         :return: dx, dy - movement in x and y axis
         """
-        max_speed = 0.3
+        max_speed = 0.7
 
         dx = 2 * max_speed * (random.random() - 0.5)
         dy = 2 * max_speed * (random.random() - 0.5)

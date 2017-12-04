@@ -5,7 +5,7 @@
 class Flags_e(object):
 
     # main
-    n_drone = 1
+    n_drone = 3
     scenario = "simple"
 
     # core
@@ -14,10 +14,10 @@ class Flags_e(object):
     gui_flag = True
     gui_timestep = 1
 
-    # render
+    # render (gui)
     port = 23456
 
     # view
-    view_render_flag = True
+    view_render_flag = False
     view_width = 64
     view_height = 64

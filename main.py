@@ -10,35 +10,20 @@ from envs.config_env import Flags_e
 if __name__ == '__main__':
 
     # === Logging setup === #
-    logger = logging.getLogger('Simsim')
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('./simsim.log')
-    sh = logging.StreamHandler()
-    fm = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > [%(name)s] %(message)s')
-    fh.setFormatter(fm)
-    sh.setFormatter(fm)
-    logger.addHandler(fh)
-    logger.addHandler(sh)
-
-    # now = time.localtime()
-    # s_time = "%02d%02d-%02d%02d%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-    # result = logging.getLogger('Result')
-    # result.setLevel(logging.INFO)
-    # result_fh = logging.FileHandler("./result/r-" + s_time + ".txt")
-    # result_fm = logging.Formatter('[%(filename)s:%(lineno)s] %(asctime)s\t%(message)s')
-    # result_fh.setFormatter(result_fm)
-    # result.addHandler(result_fh)
+    logger_env = logging.getLogger('Simsim')
+    logger_agent = logging.getLogger('Agent')
 
     # === Program start === #
-    logger.info("Simsim Start")
-
-    # == Load env == #
+    # Load environment
     env = make_env.make_env(Flags_e.scenario, Flags_e.n_drone)
+    logger_env.info('Simsim Start with %d drone(s)', Flags_e.n_drone)
 
-    # == Load agent == #
-    agent = agent.load("keyboard_agent.py").Agent(env)
+    # Load agent
+    logger_agent.info("Agent")
+    agent = agent.load("naive/naive.py").Agent(env)
+    # agent = agent.load("keyboard_agent.py").Agent(env)
 
-    # == Run == #
+    # Start run
     agent.learn()
 
     env.stop()

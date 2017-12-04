@@ -25,11 +25,16 @@ class Env(object):
                  observation_callback=None, info_callback=None,
                  done_callback=None):
 
-        logger.info("Simsim Env")
+        logger.debug("Simsim Env")
 
         self._world = world
         self._drones = world.get_drones()
         self._n_drone = world.n_drone
+
+        self._action_dim = 4
+        self._obs_dim = 3
+        self._action_max = np.array([20, 20, 0.2, np.pi/5])      # environment configuration4
+        self._action_min = np.array([-20, -20, -0.2, -np.pi/5])  # environment configuration5
 
         # scenario callbacks
         self.reset_callback = reset_callback
@@ -37,6 +42,7 @@ class Env(object):
         self.observation_callback = observation_callback
         self.info_callback = info_callback
         self.done_callback = done_callback
+
 
     def step(self, action_n):
         """
@@ -71,6 +77,31 @@ class Env(object):
     def reset(self):
         self.reset_callback(self._world)
 
+    def stop(self):
+        self._world.stop()
+
+    @property
+    def n_drone(self):
+        return self._n_drone
+
+    def get_obs(self):
+        obs_n = []
+        for drone in self._drones:
+            obs_n.append(self._get_obs(drone))
+        return obs_n
+
+    def get_obs_dim(self):
+        return self._obs_dim
+
+    def get_action_dim(self):
+        return self._action_dim
+
+    def get_action_max(self):
+        return self._action_max
+
+    def get_action_min(self):
+        return self._action_min
+
     # get info used for benchmarking
     def _get_info(self, drone):
         return self.info_callback(drone, self._world)
@@ -87,5 +118,3 @@ class Env(object):
     def _get_reward(self, drone):
         return self.reward_callback(drone, self._world)
 
-    def stop(self):
-        self._world.stop()

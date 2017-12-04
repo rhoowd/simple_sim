@@ -69,14 +69,25 @@ class Drone(Entity):
         super(Drone, self).__init__(e_id)
         self._n_drone = n_drone
         self._view = view
-        self._obs = None
+        self._obs = dict()
+        self._obs['drone'] = dict()
+        self._obs['view'] = dict()
         self._init_position_radius = Flags_e.init_position_radius
         self._height_threshold = Flags_e.height_threshold
 
     def get_obs(self):
         return self._obs
 
-    def reset_position(self):
+    def reset_drone(self, target):
+        """
+        Reset drone - reset the postion of drone and make observation of drone empty
+
+        :return:
+        """
+        self._reset_position()
+        self._reset_obs(target)
+
+    def _reset_position(self):
         """
         The position of drone is reset depending on its id
         Multiple drones form circle with given init radius (r) and face to center (0,0)
@@ -90,6 +101,16 @@ class Drone(Entity):
         self._x = -self._init_position_radius * math.sin(math.radians(self._a))
         self._y = -self._init_position_radius * math.cos(math.radians(self._a))
         self._z = self._init_position_radius
+
+    def _reset_obs(self, target):
+        """
+        Make observation of drone empty
+        :return:
+        """
+        self.update_obs_from_view(target)
+        self.update_obs_from_action((0, 0, 0, 0))
+
+        return 0
 
     def take_action(self, action):
         """
@@ -114,6 +135,20 @@ class Drone(Entity):
         if self._z < self._height_threshold:
             self._z = self._height_threshold
 
+    def update_obs_from_action(self, action):
+        """
+        Get observation (previous action)
+
+        :param action: action taken in this time step
+        :return:
+        """
+        fb, lr, ud, a = action
+        self._obs['drone']['v_fb'] = fb
+        self._obs['drone']['v_lr'] = lr
+        self._obs['drone']['v_ud'] = ud
+        self._obs['drone']['v_a'] = a
+
+
     def update_obs_from_view(self, target):
         """
         Get observation (coordinate of target in the camera view)
@@ -123,7 +158,7 @@ class Drone(Entity):
         :return
         """
         tx, ty, _, _ = target.get_position()
-        self._obs = self._view.get_view(self._x, self._y, self._z, self._a, tx, ty)
+        self._obs['view'] = self._view.get_view(self._x, self._y, self._z, self._a, tx, ty)
 
 
 # multi-agent world
@@ -142,7 +177,7 @@ class World(object):
 
         # == Initiate the position of drone == #
         for drone in self._drones:
-            drone.reset_position()
+            drone.reset_drone(self._target)
 
         # == Initiate rendering on canvas == #
         self._render_flag = Flags_e.gui_flag
@@ -187,6 +222,7 @@ class World(object):
         # == Take actions and update observation for each drone == #
         for drone_id, action in action_n.iteritems():
             self._drones[drone_id].take_action(action)
+            self._drones[drone_id].update_obs_from_action(action)
             self._drones[drone_id].update_obs_from_view(self._target)
 
         # == Rendering == #
@@ -203,7 +239,7 @@ class World(object):
         """
         self._target.reset_position()
         for drone in self._drones:
-            drone.reset_position()
+            drone.reset_drone(self._target)
 
     def stop(self):
         if self._render_flag:
