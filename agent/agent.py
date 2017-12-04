@@ -31,9 +31,9 @@ class AgentBase(object):
         self.action_min = self._env.get_action_min()
 
     def act_n(self, obs_n, step):
-        action_n = dict()
+        action_n = []
         for drone_id in range(self._n_drone):
-            action_n[drone_id] = self.act(obs_n[drone_id], step)
+            action_n.append(self.act(obs_n[drone_id], step))
 
         logger.debug("Action: " + str(action_n))
 

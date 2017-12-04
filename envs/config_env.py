@@ -12,7 +12,8 @@ class Flags_e(object):
     height_threshold = 3
     init_position_radius = 8
     gui_flag = True
-    gui_timestep = 1
+    gui_time_step = 1
+    action_time_step = 0.1
 
     # render (gui)
     port = 23456
