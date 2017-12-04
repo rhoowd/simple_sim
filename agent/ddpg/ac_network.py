@@ -8,13 +8,13 @@ import random
 
 gamma = 0.99  # reward discount factor
 
-h1_actor = 64  # hidden layer 1 size for the actor
-h2_actor = 64  # hidden layer 2 size for the actor
-h3_actor = 64  # hidden layer 3 size for the actor
+h1_actor = 32  # hidden layer 1 size for the actor
+h2_actor = 32  # hidden layer 2 size for the actor
+h3_actor = 32  # hidden layer 3 size for the actor
 
-h1_critic = 64  # hidden layer 1 size for the critic
-h2_critic = 64  # hidden layer 2 size for the critic
-h3_critic = 64  # hidden layer 3 size for the critic
+h1_critic = 32  # hidden layer 1 size for the critic
+h2_critic = 32  # hidden layer 2 size for the critic
+h3_critic = 32  # hidden layer 3 size for the critic
 
 lr_actor = 1e-5  # learning rate for the actor
 lr_critic = 1e-4  # learning rate for the critic
@@ -22,7 +22,7 @@ lr_decay = 1  # learning rate decay (per episode)
 
 tau = 1e-2  # soft target update rate
 replay_memory_capacity = int(3e4)  # capacity of experience replay memory
-minibatch_size = 512  # size of minibatch from experience replay memory for updates
+minibatch_size = 128  # size of minibatch from experience replay memory for updates
 
 np.set_printoptions(threshold=np.nan)
 

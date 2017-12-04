@@ -5,7 +5,7 @@
 class Flags_e(object):
 
     # main
-    n_drone = 3
+    n_drone = 1
     scenario = "simple"
 
     # core

@@ -19,7 +19,7 @@ result_fh.setFormatter(result_fm)
 result.addHandler(result_fh)
 
 logger_agent = logging.getLogger('Agent')
-logger_agent.setLevel(logging.DEBUG)
+logger_agent.setLevel(logging.INFO)
 fh_agent = logging.FileHandler('./agent.log')
 sh = logging.StreamHandler()
 fm = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > [%(name)s] %(message)s')

@@ -38,17 +38,21 @@ class Render(Thread):
 
     def run(self):
         while self.running:
+            self._conn = None
             self.s.listen(1)
             self._conn, addr = self.s.accept()  # 접속 승인
             print self._conn, addr
             logger.debug("Connected by " + str(addr))
             print ("Connected by " + str(addr))
             while True:
-                data = self._conn.recv(1024)
-                if not data:
-                    logger.info("Disconnect")
-                    break
-                print data
+                try:
+                    data = self._conn.recv(1024)
+                    if not data:
+                        logger.info("Disconnect")
+                        break
+                    print data
+                except Exception, e:
+                    logger.info("(render-run) Network disconnected; " + repr(e))
 
     def render(self, world):
         if self._conn is None:
@@ -85,6 +89,7 @@ class Render(Thread):
             self._conn.send(i_packet)
         except Exception, e:
             logger.info("(render) Network disconnected; " + repr(e))
+            self._conn = None
 
     def send_world(self):
         if self._conn is None:

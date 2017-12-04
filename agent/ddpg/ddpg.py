@@ -30,7 +30,7 @@ exploration_theta = 0.15    # theta parameter for the exploration noise process:
 exploration_sigma = 0.2     # sigma parameter for the exploration noise process: dXt = theta*(mu-Xt    )*dt + sigma*dWt
 
 replay_memory_capacity = int(3e4)  # capacity of experience replay memory
-minibatch_size = 512               # size of minibatch from experience replay memory for updates
+minibatch_size = 128               # size of minibatch from experience replay memory for updates
 
 load_flag = False                        # Use a pre-trained network
 guide_flag = False                      # Guide during training
@@ -38,7 +38,7 @@ guide_file = "saved/train4-210000"      # Guide weights
 save_file = "saved/Energy-weight5"      # Filename for saving the weights during training
 naive_flag = False     # Use naive tracking algorithm
 
-training_step = 100000
+training_step = 400000
 
 
 np.random.seed(0)
@@ -77,7 +77,7 @@ class Agent(AgentBase):
         self.episode = 0
         self.noise_scale = (initial_noise_scale * noise_decay ** self.episode) * (self.action_max - self.action_min)
 
-    def act(self, obs, step):
+    def act(self, obs, step, drone_id):
         """
 
         :param obs: Observation of one drone with array
@@ -91,24 +91,24 @@ class Agent(AgentBase):
         # choose action based on deterministic policy
 
         # ToDo: Error occurs here
-        print obs
         np.array(obs)
 
         s = np.reshape(obs, self.obs_dim)
 
-        action_for_state = self.actor_network.action_for_state(s)
-        logger.info("Best Action: " + str(action_for_state))
+        action = self.actor_network.action_for_state(s[None])
 
         # add temporally-correlated exploration noise to action (using an Ornstein-Uhlenbeck process)
         self.noise_process = exploration_theta * (exploration_mu - self.noise_process) + exploration_sigma * np.random.randn(self.action_dim)
 
-        action_for_state += self.noise_scale * self.noise_process
-        action_for_state = np.maximum(action_for_state, self.action_min)
-        action_for_state = np.minimum(action_for_state, self.action_max)
+        action += self.noise_scale * self.noise_process
+        action = np.maximum(action, self.action_min)
+        action = np.minimum(action, self.action_max)
 
-        # return action_for_state
+        action = np.squeeze(action)
 
-        return 0, 0, 0, 0
+        logger.debug("Action (Drone " + str(drone_id) + "): " + str(action))
+
+        return action
 
     def learn(self, train=True):
         """
@@ -122,6 +122,11 @@ class Agent(AgentBase):
         # == Initialize == #
         step = 0
         obs_n = self._env.get_obs()
+        obs_single = np.squeeze(obs_n)  # This is for init # TODO  obs_single = np.squeeze(obs_n) is more natural
+        acc_reward = 0
+        prev_reset_step = 0
+        reset_cnt = 0
+        acc_reset_step = 0
 
         while True:
             step += 1
@@ -131,13 +136,85 @@ class Agent(AgentBase):
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)
-
             logger.debug("Result: "+str(obs_n) + " " + str(reward_n) + " " + str(done_n) + " " + str(info_n))
 
+            # == Reset decision == #
+            # TODO: Where is proper location of this? What is impact of reset
+            # TODO: Need to discuss with KH
             if sum(done_n) == self._n_drone:
                 self._env.reset()
+                obs_n = self._env.get_obs()
+                obs_single = np.squeeze(obs_n)  # This is for init
+                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
+                reset_cnt += 1
+                acc_reset_step += (step - prev_reset_step)
+                prev_reset_step = step
+                continue
 
-            if step % 10 == 0:
-                s = raw_input('press enter to continue, (q) for quit > ')
-                if s == 'q':
-                    break
+            # == DDPG start == #
+
+            # Erase one entry in replay buffer when it is full
+            if len(self.replay_buffer.replay_memory) == replay_memory_capacity:
+                self.replay_buffer.erase()
+
+            obs_single_next = np.squeeze(obs_n)
+            action_single = np.squeeze(action_n)
+            reward_single = reward_n[0]
+            # print obs_single, action_single, reward_single, obs_single_next
+
+            self.replay_buffer.add_to_memory((obs_single, action_single, reward_single, obs_single_next, 1.0))
+            # is next_observation a terminal state?
+            # 0.0 if done and not env.env._past_limit() else 1.0))
+            # 0.0 if info =="reset" else 1.0
+
+            # update network weights to fit a minibatch of experience
+            if len(self.replay_buffer.replay_memory) >= minibatch_size*5:
+                # grab N (s,a,r,s') tuples from replay memory
+                minibatch = self.replay_buffer.sample_from_memory()
+
+                # update the critic and actor params using mean-square value error and deterministic policy gradient, respectively
+                sugg_action = self.actor_network.action_for_state(np.asarray([elem[0] for elem in minibatch]))
+                q_sugg_action = self.critic_network.q_for_given_action(np.asarray([elem[0] for elem in minibatch]),sugg_action)
+
+                gradient = self.critic_network.grads_for_action(np.asarray([elem[0] for elem in minibatch]),
+                                                             sugg_action)
+
+                target_action_next_state = self.actor_network.target_action_for_next_state(np.asarray([elem[3] for elem in minibatch]))
+
+                _ = self.critic_network.training_critic(np.asarray([elem[0] for elem in minibatch]),
+                                                        np.asarray([elem[1] for elem in minibatch]),
+                                                        target_action_next_state,
+                                                        np.asarray([elem[2] for elem in minibatch]),
+                                                        np.asarray([elem[3] for elem in minibatch]),
+                                                        np.asarray([elem[4] for elem in minibatch]))
+                _ = self.actor_network.training_actor(np.asarray([elem[0] for elem in minibatch]),
+                                                      gradient)
+
+                # update slow actor and critic targets towards current actor and critic
+                _ = self.actor_network.training_target_actor()
+                _ = self.critic_network.training_target_critic()
+
+            obs_single = obs_single_next
+
+            # == Print progress == #
+            acc_reward += reward_single
+            if step % 1000 == 0:
+                if reset_cnt == 0:
+                    reset_cnt = 1
+                logger.info('({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0, acc_reset_step/reset_cnt))
+                acc_reward = 0
+                reset_cnt = 0
+                acc_reset_step = 0
+
+
+
+            # == Key board interrupt enable == #
+            # if step % 100 == 0:
+            #     logger.info('{}/{}'.format(step, training_step))
+            #
+            #     s = raw_input('press enter to continue, (q) for quit > ')
+            #     if s == 'q':
+            #         break
+
+            if step > training_step:
+                break
