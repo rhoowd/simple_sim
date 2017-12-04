@@ -132,7 +132,7 @@ class Scenario(BaseScenario):
         :param world:
         :return: dx, dy - movement in x and y axis
         """
-        max_speed = 0.7
+        max_speed = 3
 
         dx = 2 * max_speed * (random.random() - 0.5)
         dy = 2 * max_speed * (random.random() - 0.5)

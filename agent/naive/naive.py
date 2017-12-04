@@ -27,38 +27,44 @@ class Agent(AgentBase):
 
     def act(self, obs, step):
 
+        action = [0] * self.action_dim
         x_pos = obs[0]
         y_pos = obs[1]
         z_pos = obs[2]
 
         if x_pos < 24:
-            v_lr = -0.6
+            v_lr = -1
         elif x_pos < 16:
-            v_lr = -1.2
+            v_lr = -2
         elif x_pos > 40:
-            v_lr = 0.6
+            v_lr = 1
         elif x_pos > 48:
-            v_lr = -1.2
+            v_lr = -2
         else:
             v_lr = 0
 
         if y_pos < 24:
-            v_fb = 0.6
+            v_fb = 1
         elif y_pos < 16:
-            v_fb = 1.2
+            v_fb = 2
         elif y_pos > 40:
-            v_fb = -0.6
+            v_fb = -1
         elif y_pos > 48:
-            v_fb = -1.2
+            v_fb = -2
         else:
             v_fb = 0
 
         if z_pos < 3.5:
-            v_ud = 0.2
+            v_ud = 2
         else:
             v_ud = 0
 
-        return v_fb, v_lr, v_ud, 0
+        action[0] = v_fb
+        action[1] = v_lr
+        action[2] = v_ud
+        action[3] = 0
+
+        return action
 
     def learn(self, train=True):
         """

@@ -59,9 +59,9 @@ class Target(Entity):
         self._y = 0.0
         self._z = 0.0
 
-    def move(self, dx, dy):
-        self._x += dx
-        self._y += dy
+    def move(self, dx, dy, action_time_step):
+        self._x += dx * action_time_step
+        self._y += dy * action_time_step
 
 
 class Drone(Entity):
@@ -112,16 +112,23 @@ class Drone(Entity):
 
         return 0
 
-    def take_action(self, action):
+    def take_action(self, action, action_time_step):
         """
         Take action for given action
+        Action is velocity.
+        Action time step is
          - Action format: (fb, lr, ud, a)
 
         :param action: fb: forward/backward, lr: left/right, ud: up/down, a: angle
         :return:
         """
         logger.debug("drone_id: " + str(self._id) + ", Take action: " + str(action))
-        fb, lr, ud, da = action
+
+        fb = action[0] * action_time_step
+        lr = action[1] * action_time_step
+        ud = action[2] * action_time_step
+        da = action[3] * action_time_step
+
         # Update fb
         self._x += fb * math.sin(math.radians(self._a))
         self._y += fb * math.cos(math.radians(self._a))
@@ -166,6 +173,7 @@ class World(object):
     def __init__(self, n_drone=1, target_movement_callback=None):
 
         self._n_drone = n_drone
+        self._action_time_step = Flags_e.action_time_step
         self._target = Target()
         self._drones = []
         self._view = View()
@@ -217,18 +225,18 @@ class World(object):
 
         # == set action for target
         dx, dy = self.target_movement(self._target, self)
-        self._target.move(dx, dy)
+        self._target.move(dx, dy, self._action_time_step)
 
         # == Take actions and update observation for each drone == #
-        for drone_id, action in action_n.iteritems():
-            self._drones[drone_id].take_action(action)
-            self._drones[drone_id].update_obs_from_action(action)
-            self._drones[drone_id].update_obs_from_view(self._target)
+        for drone in self._drones:
+            drone.take_action(action_n[drone.id],self._action_time_step)
+            drone.update_obs_from_action(action_n[drone.id])
+            drone.update_obs_from_view(self._target)
 
         # == Rendering == #
         if self._render_flag:
             self._render_cnt += 1
-            if self._render_flag == Flags_e.gui_timestep:
+            if self._render_flag == Flags_e.gui_time_step:
                 self._render_cnt = 0
                 self._render.render(self)
 

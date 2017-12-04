@@ -27,9 +27,9 @@ class Agent(object):
 
     def learn(self):
         print "learn start"
-        action = dict()
+
         while True:
-            s = raw_input('action: ')
+            s = raw_input('action or (exit): ')
             if s == 'a':
                 v = (0, -self._step, 0, 0)
             elif s == 's':
@@ -51,9 +51,17 @@ class Agent(object):
             else:
                 print "wrong input"
                 continue
-            action[self._drone_id] = v
-            # action[1] = v
-            obs_n, reward_n, done_n, info_n = self._env.step(action)
+            action = [0] * 4
+
+            action[0] = v[0]
+            action[1] = v[1]
+            action[2] = v[2]
+            action[3] = v[3]
+
+            action_n = []
+            action_n.append(action)
+
+            obs_n, reward_n, done_n, info_n = self._env.step(action_n)
             print "agent:", obs_n, reward_n, done_n
             if sum(done_n) == self._n_drone:
                 self._env.reset()
