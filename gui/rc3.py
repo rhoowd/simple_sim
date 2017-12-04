@@ -49,8 +49,6 @@ class Canvas():
         self.wy = wy
         self.zoom_sensitivity = 1.02 # Change this to zoom faster
         self.pan_sensitivity = 5 # Change this to move screen faster
-        self.mouseX = self.wx/2
-        self.mouseY = self.wy/2
         self.sx = 0
         self.sy = 0
         
@@ -64,10 +62,15 @@ class Canvas():
         # Camera view parameters
         # vx, vy: resolution
         # vmargin: view-to-view margin
-        self.vx = 64
-        self.vy = 64
+        self.vx = 128
+        self.vy = 128
         self.vmargin = 15
 
+        # Correctors for intuitive viewing
+        self.angle_corrector = 90
+        self.x_corrector = self.framex/2
+        self.y_corrector = self.framey/2
+        
     def setup(self):
         
         # --- Socket setup ---
@@ -119,7 +122,6 @@ class Canvas():
                 if ((event.type == pygame.QUIT) or ((event.type == pygame.KEYDOWN) and (event.key == pygame.K_q))):
                     self.done = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouseX, self.mouseY = pygame.mouse.get_pos()
                     if event.button == 4:
                         self.wx *= self.zoom_sensitivity
                         self.wy *= self.zoom_sensitivity
@@ -161,10 +163,20 @@ class Canvas():
                             update = j_msg["payload"]["data"]
                             for obj in self.guiObjectsList:
                                 if ((obj.name == "target") or ("drone" in obj.name)):
-                                    obj.x = update[str(obj.name)]["x"]
-                                    obj.y = update[str(obj.name)]["y"]
+                                    # --- Remotely generated test data ---
+                                    obj.x = update[str(obj.name)]["x"] + self.x_corrector
+                                    obj.y = self.y_corrector - update[str(obj.name)]["y"]
                                     obj.z = update[str(obj.name)]["z"]
-                                    obj.a = update[str(obj.name)]["a"]
+                                    obj.a = self.angle_corrector - update[str(obj.name)]["a"]
+
+
+
+                                    # --- Locally generated test data ---
+                                    # obj.x = 0 + self.framex/2 # Replace 0 with real-time value
+                                    # obj.y = self.framey - 0 - self.framey/2 # Replace 0 with real-time value
+                                    # obj.z = 25
+                                    # obj.a = 90 - 0 # Replace 0 with real-time value
+
                                 if ("view" in obj.name):
                                     obj.x, obj.y = update["drone"+str(obj.name[-1])]["center"]
                                     obj.size = update["drone"+str(obj.name[-1])]["size"]
@@ -267,7 +279,7 @@ class Canvas():
             for guiObject in self.guiObjectsList:
                 # Camera Views
                 if "view" in guiObject.name:
-                    self.display_surface.blit(guiObject.surface, (self.framex - guiObject.vx - self.vmargin, guiObject.view_id*self.vmargin + (guiObject.view_id+1)*guiObject.vy))
+                    self.display_surface.blit(guiObject.surface, (self.framex - guiObject.sx - self.vmargin, guiObject.view_id*self.vmargin + (guiObject.view_id+1)*guiObject.sy))
                     
             self.display_surface.blit(pygame.transform.scale(self.movable_surface, (int(self.wx), int(self.wy))), (int((self.framex - self.wx)/2 + self.sx), int((self.framey - self.wy)/2 + self.sy)))
 
