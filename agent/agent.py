@@ -35,8 +35,6 @@ class AgentBase(object):
         for drone_id in range(self._n_drone):
             action_n.append(self.act(obs_n[drone_id], step, drone_id))
 
-        logger.debug("Action: " + str(action_n))
-
         return action_n
 
     @abc.abstractmethod
