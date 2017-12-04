@@ -68,7 +68,7 @@ class guiDrone():
         self.surface = self.surface.convert_alpha()
 
 class guiCameraView():
-    def __init__(self, ci = (0, 0), si = 20, vx = 64, vy = 64, view_id = 0):
+    def __init__(self, ci = (0, 0), si = 20, vx = 128, vy = 128, view_id = 0):
         # Take initial dimensions of view screen and target position on camera view
         self.center = ci
         self.size = si
