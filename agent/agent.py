@@ -33,14 +33,14 @@ class AgentBase(object):
     def act_n(self, obs_n, step):
         action_n = []
         for drone_id in range(self._n_drone):
-            action_n.append(self.act(obs_n[drone_id], step))
+            action_n.append(self.act(obs_n[drone_id], step, drone_id))
 
         logger.debug("Action: " + str(action_n))
 
         return action_n
 
     @abc.abstractmethod
-    def act(self, obs, step):
+    def act(self, obs, step, drone_id):
         pass
 
     @abc.abstractmethod
