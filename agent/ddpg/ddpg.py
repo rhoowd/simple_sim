@@ -52,27 +52,32 @@ class Agent(AgentBase):
         logger.info("DDPG agent is created")
 
         tf.reset_default_graph()
-        graph = tf.Graph()
+        my_graph = tf.Graph()
 
-        self.sessions = []
-        self.sess = tf.Session(graph=graph)
+        with my_graph.as_default():
+            self.sess = tf.Session(graph=my_graph)
 
-        self.actor_network = ActorNetwork(
-            self.sess, self.state_dim, self.action_dim,
-            self.action_min, self.action_max)
+            self.actor_network = ActorNetwork(
+                self.sess, self.obs_dim, self.action_dim,
+                self.action_min, self.action_max)
 
-        self.critic_network = CriticNetwork(
-            self.sess, self.state_dim, self.action_dim)
+            self.critic_network = CriticNetwork(
+                self.sess, self.obs_dim, self.action_dim)
 
-        self.sess.run(tf.global_variables_initializer())
-        self.saver = tf.train.Saver()
+            self.sess.run(tf.global_variables_initializer())
+            self.saver = tf.train.Saver()
 
-        if load_flag:
-            self.saver.restore(self.sess, None)
+            if load_flag:
+                self.saver.restore(self.sess, None)
 
-        self.sessions.append(self.sess)
+        self.replay_buffer = ReplayBuffer()
 
-    def _act(self, obs, step):
+        # Initialize exploration noise process
+        self.noise_process = np.zeros(self.action_dim)
+        self.episode = 0
+        self.noise_scale = (initial_noise_scale * noise_decay ** self.episode) * (self.action_max - self.action_min)
+
+    def act(self, obs, step):
         """
 
         :param obs: Observation of one drone with array
@@ -81,23 +86,29 @@ class Agent(AgentBase):
         """
 
         step = step / 1.
-        self.noise_scale = (last_noise_scale + initial_noise_scale * (1-(step/training_step) )) * (self._action_max - self._action_min)
+        self.noise_scale = (last_noise_scale + initial_noise_scale * (1-(step/training_step))) * (self.action_max - self.action_min)
 
         # choose action based on deterministic policy
-        action_for_state = self.actor_network.action_for_state(obs)
-        print 'best action'
-        print action_for_state
+
+        # ToDo: Error occurs here
+        print obs
+        np.array(obs)
+
+        s = np.reshape(obs, self.obs_dim)
+
+        action_for_state = self.actor_network.action_for_state(s)
+        logger.info("Best Action: " + str(action_for_state))
 
         # add temporally-correlated exploration noise to action (using an Ornstein-Uhlenbeck process)
-        self.noise_process = exploration_theta * (exploration_mu - self.noise_process) + exploration_sigma * np.random.randn(self._action_dim)
+        self.noise_process = exploration_theta * (exploration_mu - self.noise_process) + exploration_sigma * np.random.randn(self.action_dim)
 
         action_for_state += self.noise_scale * self.noise_process
-        action_for_state = np.maximum(action_for_state, self._action_min)
-        action_for_state = np.minimum(action_for_state, self._action_max)
+        action_for_state = np.maximum(action_for_state, self.action_min)
+        action_for_state = np.minimum(action_for_state, self.action_max)
 
-        return action_for_state
+        # return action_for_state
 
-        return v_fb, v_lr, v_ud, 0
+        return 0, 0, 0, 0
 
     def learn(self, train=True):
         """
@@ -116,7 +127,7 @@ class Agent(AgentBase):
             step += 1
 
             # == Get action == #
-            action_n = self._act_n(obs_n, step)
+            action_n = self.act_n(obs_n, step)
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)

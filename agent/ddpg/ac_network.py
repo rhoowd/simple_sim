@@ -120,8 +120,8 @@ class ActorNetwork:
         return actions
 
     def action_for_state(self, state_ph):
-
-        return self.sess.run(self.actions,
+        print state_ph.shape
+            return self.sess.run(self.actions,
                              feed_dict={self.state_ph: state_ph/10, self.is_training_ph: False})
 
     def target_action_for_next_state(self, next_state_ph):
