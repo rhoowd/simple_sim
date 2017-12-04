@@ -78,7 +78,7 @@ class guiCameraView():
         self.name = "view" + str(view_id)
 
         # Label the camera view
-        self.fs = 15 # font size
+        self.fs = 20 # font size
         self.font = pygame.font.SysFont(pygame.font.get_default_font(), self.fs)
         self.text = "Drone " + str(view_id)
         self.label = self.font.render(self.text, True, BLACK)
