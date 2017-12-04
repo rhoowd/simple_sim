@@ -64,8 +64,6 @@ class Agent(AgentBase):
         action[2] = v_ud
         action[3] = 0
 
-        print drone_id
-
         return action
 
     def learn(self, train=True):
@@ -86,6 +84,7 @@ class Agent(AgentBase):
 
             # == Get action == #
             action_n = self.act_n(obs_n, step)
+            logger.debug("Action: " + str(action_n))
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)
