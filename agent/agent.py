@@ -25,22 +25,22 @@ class AgentBase(object):
         self._env = env
         self._n_drone = env.n_drone
 
-        self._obs_dim = self._env.get_obs_dim()
-        self._action_dim = self._env.get_action_dim()
-        self._action_max = self._env.get_action_max()
-        self._action_min = self._env.get_action_min()
+        self.obs_dim = self._env.get_obs_dim()
+        self.action_dim = self._env.get_action_dim()
+        self.action_max = self._env.get_action_max()
+        self.action_min = self._env.get_action_min()
 
-    def _act_n(self, obs_n, step):
+    def act_n(self, obs_n, step):
         action_n = dict()
         for drone_id in range(self._n_drone):
-            action_n[drone_id] = self._act(obs_n[drone_id], step)
+            action_n[drone_id] = self.act(obs_n[drone_id], step)
 
         logger.debug("Action: " + str(action_n))
 
         return action_n
 
     @abc.abstractmethod
-    def _act(self, obs, step):
+    def act(self, obs, step):
         pass
 
     @abc.abstractmethod

@@ -25,7 +25,7 @@ class Agent(AgentBase):
         super(Agent, self).__init__(env)
         logger.info("Naive agent is created")
 
-    def _act(self, obs, step):
+    def act(self, obs, step):
 
         x_pos = obs[0]
         y_pos = obs[1]
@@ -77,7 +77,7 @@ class Agent(AgentBase):
             step += 1
 
             # == Get action == #
-            action_n = self._act_n(obs_n, step)
+            action_n = self.act_n(obs_n, step)
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)
