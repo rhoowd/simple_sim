@@ -16,12 +16,17 @@ For rendering on canvas, transfer data to canvas by socket
 import json
 import socket
 from threading import Thread
-import random
+import time
 from envs.config_env import Flags_e
+from Queue import Queue
 
 import logging
 logger = logging.getLogger('Simsim.render')
 
+INIT = 0
+PAUSE = 1
+PLAY = 2
+FF = 3
 
 class Render(Thread):
     def __init__(self):
@@ -31,6 +36,8 @@ class Render(Thread):
         self._port = Flags_e.port
         self._conn = None
         self.running = True
+        self._state = INIT
+        self._pause_queue = Queue()
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -38,26 +45,35 @@ class Render(Thread):
 
     def run(self):
         while self.running:
-            self._conn = None
             self.s.listen(1)
             self._conn, addr = self.s.accept()  # 접속 승인
             print self._conn, addr
             logger.debug("Connected by " + str(addr))
             print ("Connected by " + str(addr))
             while True:
-                try:
-                    data = self._conn.recv(1024)
-                    if not data:
-                        logger.info("Disconnect")
-                        break
-                    print data
-                except Exception, e:
-                    logger.info("(render-run) Network disconnected; " + repr(e))
+                data = self._conn.recv(1024)
+                if not data:
+                    logger.info("Disconnect")
+                    break
+                print data
+                if data == "pause":
+                    self._state = PAUSE
+                elif data == "play":
+                    self._state = PLAY
+                    self._pause_queue.put("play")
+                elif data == "ff":
+                    self._state = FF
+                    self._pause_queue.put("ff")
 
     def render(self, world):
         if self._conn is None:
             logger.debug("Not connected")
             return
+
+        if self._state == PLAY:
+            time.sleep(0.1)
+        elif self._state == PAUSE:
+            print self._pause_queue.get()
 
         update_data = dict()
         drones = world.get_drones()
@@ -89,53 +105,6 @@ class Render(Thread):
             self._conn.send(i_packet)
         except Exception, e:
             logger.info("(render) Network disconnected; " + repr(e))
-            self._conn = None
-
-    def send_world(self):
-        if self._conn is None:
-            logger.debug("Not connected")
-            return
-
-        update_data = {}
-        drone1 = {}
-        drone2 = {}
-        drone3 = {}
-        target = {}
-        drone1["x"] = 100
-        drone1["y"] = 100
-        drone1["z"] = 10 + random.randint(-1, 1)
-        drone1["a"] = 245 + random.randint(-5, 5)
-        drone1["center"] = (32 + random.randint(-3, 3), 43 + random.randint(-3, 3))
-        drone1["size"] = 3 + random.randint(-1, 3)
-
-        drone2["x"] = -100
-        drone2["y"] = -100
-        drone2["z"] = 10 + random.randint(-1, 1)
-        drone2["a"] = 348 + random.randint(-5, 5)
-        drone2["center"] = (15 + random.randint(-3, 3), 50 + random.randint(-3, 3))
-        drone2["size"] = 3 + random.randint(-1, 3)
-
-        drone3["x"] = 100
-        drone3["y"] = -100
-        drone3["z"] = 10 + random.randint(-1, 1)
-        drone3["a"] = 58 + random.randint(-5, 5)
-        drone3["center"] = (9 + random.randint(-3, 3), 23 + random.randint(-3, 3))
-        drone3["size"] = 3 + random.randint(-1, 3)
-
-        target["x"] = 0
-        target["y"] = 0
-        target["z"] = 0
-        target["a"] = 0
-
-        update_data["drone1"] = drone1
-        update_data["drone2"] = drone2
-        update_data["drone3"] = drone3
-        update_data["target"] = target
-
-        response = self.make_msg("TestServer", "Canvas", "response", "update", update_data)
-
-        i_packet = json.dumps(response)
-        self._conn.send(i_packet)
 
     def make_msg(self, _src, _dst, _topic, _command, _data):
         # Makes a dict type message
@@ -156,12 +125,3 @@ class Render(Thread):
         socket.socket(socket.AF_INET,
                       socket.SOCK_STREAM).connect(("localhost", self._port))
         self.s.close()
-
-
-if __name__ == '__main__':
-    import time
-    render = Render()
-    render.start()
-    while True:
-        render.send_world()
-        time.sleep(0.1)
