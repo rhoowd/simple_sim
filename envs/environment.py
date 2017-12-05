@@ -32,7 +32,7 @@ class Env(object):
         self._n_drone = world.n_drone
 
         self._action_dim = 4
-        self._obs_dim = 3
+        self._obs_dim = 56
         self._action_max = np.array([20, 20, 0.2, np.pi/5])      # environment configuration4
         self._action_min = np.array([-20, -20, -0.2, -np.pi/5])  # environment configuration5
 

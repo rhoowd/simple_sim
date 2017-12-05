@@ -6,12 +6,12 @@ class Flags_e(object):
 
     # main
     n_drone = 1
-    scenario = "simple"
+    scenario = "simple_history"
 
     # core
     height_threshold = 3
     init_position_radius = 8
-    gui_flag = True
+    gui_flag = False
     gui_time_step = 1
     action_time_step = 0.1
 
