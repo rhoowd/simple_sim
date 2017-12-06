@@ -19,8 +19,10 @@ import numpy as np
 import tensorflow as tf
 from agent.ddpg.ac_network import *
 import logging
+import agent
 
 logger = logging.getLogger("Agent")
+result = logging.getLogger('Result')
 
 initial_noise_scale = 0.8   # scale of the exploration noise process (1.0 is the range of each action dimension)
 last_noise_scale = 0.2
@@ -33,9 +35,8 @@ replay_memory_capacity = int(3e4)  # capacity of experience replay memory
 minibatch_size = 128               # size of minibatch from experience replay memory for updates
 
 load_flag = False                        # Use a pre-trained network
-guide_flag = False                      # Guide during training
-guide_file = "saved/train4-210000"      # Guide weights
-save_file = "saved/Energy-weight5"      # Filename for saving the weights during training
+save_file = "result/nn/" + agent.s_time  # Filename for saving the weights during training
+
 naive_flag = False     # Use naive tracking algorithm
 
 training_step = 400000
@@ -201,12 +202,18 @@ class Agent(AgentBase):
             if step % 1000 == 0:
                 if reset_cnt == 0:
                     reset_cnt = 1
-                logger.info('({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0, acc_reset_step/reset_cnt))
+                logger.info(
+                    '({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0,
+                                                                         acc_reset_step / reset_cnt))
+                result.info(
+                    '({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0,
+                                                                         acc_reset_step / reset_cnt))
+
                 acc_reward = 0
                 reset_cnt = 0
                 acc_reset_step = 0
 
-
+                self.saver.save(self.sess, save_file, step)
 
             # == Key board interrupt enable == #
             # if step % 100 == 0:

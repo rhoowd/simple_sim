@@ -28,7 +28,7 @@ class Scenario(BaseScenario):
     def __init__(self):
         self._n_drone = 0
         self._fail_cnt = None
-        self._fail_threshold = 50
+        self._fail_threshold = 30
         self._history_len = 8
         self._obs = -2 * np.ones((7, self._history_len))
         self.pos_max = np.sqrt(2*32**2)*1.5
