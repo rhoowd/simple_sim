@@ -2,3 +2,4 @@
 *.txt
 *.log
 result/nn/*
+.idea/
