@@ -12,6 +12,12 @@ def config_env(_flags):
     flags.DEFINE_float("position_weight", 0.5, "The position for size in reward function")
     flags.DEFINE_float("size_weight", 0.5, "The weight for size in reward function")
 
+    # Reset and failure
+    flags.DEFINE_integer("fail_threshold", 30, "When terminate episode")
+
+    # Observation
+    flags.DEFINE_integer("history_len", 8, "How many previous steps we look back")
+
     # core
     flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")
     flags.DEFINE_float("init_position_radius", 8.0, "Initial distance between drone and target")

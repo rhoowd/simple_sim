@@ -16,7 +16,9 @@ Environment Simsim
 from envs.core import World
 import random
 import logging
+import config
 
+FLAGS = config.flags.FLAGS
 logger = logging.getLogger('Simsim.scenario')
 
 
@@ -26,7 +28,7 @@ class BaseScenario(object):
     def __init__(self):
         self._n_drone = 0
         self._fail_cnt = None
-        self._fail_threshold = 30
+        self._fail_threshold = FLAGS.fail_threshold
 
     def make_world(self, n_drone, target_move_callback):
         logger.debug("make world")
