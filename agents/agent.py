@@ -30,7 +30,7 @@ class AgentBase(object):
         self.action_max = self._env.get_action_max()
         self.action_min = self._env.get_action_min()
 
-    def act_n(self, obs_n, step):
+    def act_n(self, obs_n, step, train=True):
         action_n = []
         for drone_id in range(self._n_drone):
             action_n.append(self.act(obs_n[drone_id], step, drone_id))
@@ -38,7 +38,7 @@ class AgentBase(object):
         return action_n
 
     @abc.abstractmethod
-    def act(self, obs, step, drone_id):
+    def act(self, obs, step, drone_id, train=True):
         pass
 
     @abc.abstractmethod

@@ -90,13 +90,13 @@ class BaseScenario(BS):
 
     def get_size_penalty(self, size):
 
-        if 10 < size < 21:
-            return (-1./10)*size + 2
-        elif 20 < size < 41:
+        if 30 < size <= 250:
+            return (-1./220)*(size - 250)
+        elif 250 < size <= 300:
             return 0.
-        elif 40 < size < 401:
-            return (1./360)*(size-40)
-        else:  # size < 11 or size > 400
+        elif 300 < size < 500:
+            return (1./200)*(size-300)
+        else:  # size < 30 or size > 500
             return 1.
 
     def observation(self, drone, world):

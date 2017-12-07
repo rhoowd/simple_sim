@@ -35,7 +35,8 @@ exploration_sigma = 0.2     # sigma parameter for the exploration noise process:
 replay_memory_capacity = int(3e4)  # capacity of experience replay memory
 minibatch_size = FLAGS.minibatch_size             # size of minibatch from experience replay memory for updates
 
-load_flag = FLAGS.load_nn                      # Use a pre-trained network
+load_flag = FLAGS.load_nn                       # Use a pre-trained network
+load_file = FLAGS.nn_file                       # Filename of the weights to be loaded
 save_file = "result/nn/nn-" + config.file_name  # Filename for saving the weights during training
 
 training_step = FLAGS.training_step
@@ -50,8 +51,6 @@ class Agent(AgentBase):
     def __init__(self, env):
         super(Agent, self).__init__(env)
         logger.info("DDPG agent is created")
-
-        print "1", minibatch_size, training_step
 
         tf.reset_default_graph()
         my_graph = tf.Graph()
@@ -70,7 +69,7 @@ class Agent(AgentBase):
             self.saver = tf.train.Saver()
 
             if load_flag:
-                self.saver.restore(self.sess, None)
+                self.saver.restore(self.sess, "result/nn/"+load_file)
 
         self.replay_buffer = ReplayBuffer()
 
@@ -79,7 +78,7 @@ class Agent(AgentBase):
         self.episode = 0
         self.noise_scale = (initial_noise_scale * noise_decay ** self.episode) * (self.action_max - self.action_min)
 
-    def act(self, obs, step, drone_id):
+    def act(self, obs, step, drone_id, train=True):
         """
 
         :param obs: Observation of one drone with array
@@ -99,12 +98,13 @@ class Agent(AgentBase):
 
         action = self.actor_network.action_for_state(s[None])
 
-        # add temporally-correlated exploration noise to action (using an Ornstein-Uhlenbeck process)
-        self.noise_process = exploration_theta * (exploration_mu - self.noise_process) + exploration_sigma * np.random.randn(self.action_dim)
+        if train:
+            # add temporally-correlated exploration noise to action (using an Ornstein-Uhlenbeck process)
+            self.noise_process = exploration_theta * (exploration_mu - self.noise_process) + exploration_sigma * np.random.randn(self.action_dim)
 
-        action += self.noise_scale * self.noise_process
-        action = np.maximum(action, self.action_min)
-        action = np.minimum(action, self.action_max)
+            action += self.noise_scale * self.noise_process
+            action = np.maximum(action, self.action_min)
+            action = np.minimum(action, self.action_max)
 
         action = np.squeeze(action)
 
@@ -131,30 +131,25 @@ class Agent(AgentBase):
         acc_reset_step = 0
 
         while True:
+
             step += 1
 
             # == Get action == #
-            action_n = self.act_n(obs_n, step)
+            action_n = self.act_n(obs_n, step, train)
 
             # == Take on step == #
             obs_n, reward_n, done_n, info_n = self._env.step(action_n)
             logger.debug("Result: "+str(obs_n) + " " + str(reward_n) + " " + str(done_n) + " " + str(info_n))
 
-            # == Reset decision == #
-            # TODO: Where is proper location of this? What is impact of reset
-            # TODO: Need to discuss with KH
-            if sum(done_n) == self._n_drone:
-                self._env.reset()
-                obs_n = self._env.get_obs()
-                obs_single = np.squeeze(obs_n)  # This is for init
-                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
-                reset_cnt += 1
-                acc_reset_step += (step - prev_reset_step)
-                prev_reset_step = step
+            # If it is running test without training
+            if not train:
+                if sum(done_n) == self._n_drone:
+                    self._env.reset()
+                    obs_n = self._env.get_obs()
+                    logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
                 continue
 
             # == DDPG start == #
-
             # Erase one entry in replay buffer when it is full
             if len(self.replay_buffer.replay_memory) == replay_memory_capacity:
                 self.replay_buffer.erase()
@@ -164,10 +159,21 @@ class Agent(AgentBase):
             reward_single = reward_n[0]
             # print obs_single, action_single, reward_single, obs_single_next
 
-            self.replay_buffer.add_to_memory((obs_single, action_single, reward_single, obs_single_next, 1.0))
-            # is next_observation a terminal state?
+            self.replay_buffer.add_to_memory((obs_single, action_single, reward_single, obs_single_next,
+                                              0.0 if sum(done_n) == self._n_drone else 1.0))
+            # is next_observation a terminal state? means that sum(done_n) == self._n_drone
             # 0.0 if done and not env.env._past_limit() else 1.0))
-            # 0.0 if info =="reset" else 1.0
+
+            # == Reset decision == #
+            if sum(done_n) == self._n_drone:
+                self._env.reset()
+                obs_n = self._env.get_obs()
+                obs_single = np.squeeze(obs_n)  # This is for init
+                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
+                reset_cnt += 1
+                acc_reset_step += (step - prev_reset_step)
+                prev_reset_step = step
+                continue
 
             # update network weights to fit a minibatch of experience
             if len(self.replay_buffer.replay_memory) >= minibatch_size*5:
