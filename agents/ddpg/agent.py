@@ -143,15 +143,7 @@ class Agent(AgentBase):
             # == Reset decision == #
             # TODO: Where is proper location of this? What is impact of reset
             # TODO: Need to discuss with KH
-            if sum(done_n) == self._n_drone:
-                self._env.reset()
-                obs_n = self._env.get_obs()
-                obs_single = np.squeeze(obs_n)  # This is for init
-                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
-                reset_cnt += 1
-                acc_reset_step += (step - prev_reset_step)
-                prev_reset_step = step
-                continue
+
 
             # == DDPG start == #
 
@@ -164,10 +156,20 @@ class Agent(AgentBase):
             reward_single = reward_n[0]
             # print obs_single, action_single, reward_single, obs_single_next
 
-            self.replay_buffer.add_to_memory((obs_single, action_single, reward_single, obs_single_next, 1.0))
-            # is next_observation a terminal state?
+            self.replay_buffer.add_to_memory((obs_single, action_single, reward_single, obs_single_next,
+                                              0.0 if sum(done_n) == self._n_drone else 1.0))
+            # is next_observation a terminal state? means that sum(done_n) == self._n_drone
             # 0.0 if done and not env.env._past_limit() else 1.0))
-            # 0.0 if info =="reset" else 1.0
+
+            if sum(done_n) == self._n_drone:
+                self._env.reset()
+                obs_n = self._env.get_obs()
+                obs_single = np.squeeze(obs_n)  # This is for init
+                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
+                reset_cnt += 1
+                acc_reset_step += (step - prev_reset_step)
+                prev_reset_step = step
+                continue
 
             # update network weights to fit a minibatch of experience
             if len(self.replay_buffer.replay_memory) >= minibatch_size*5:

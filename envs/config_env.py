@@ -17,6 +17,7 @@ def config_env(_flags):
 
     # Observation
     flags.DEFINE_integer("history_len", 8, "How many previous steps we look back")
+    flags.DEFINE_boolean("obs_with_action", True, "Observation includes action or only image result")
 
     # core
     flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")

@@ -31,13 +31,17 @@ class Scenario(BaseScenario):
     def __init__(self):
         super(Scenario, self).__init__()
         self._history_len = FLAGS.history_len
-        self._obs = -2 * np.ones((7, self._history_len))
+        if FLAGS.obs_with_action:
+            self._obs_dim = 7
+        else:
+            self._obs_dim = 3
+        self._obs = -2 * np.ones((self._obs_dim, self._history_len))
         self.pos_max = np.sqrt(2*32**2)*1.5
 
     def reset_world(self, world):
         BaseScenario.reset_world(self, world)
 
-        self._obs = -2 * np.ones((7, self._history_len))
+        self._obs = -2 * np.ones((self._obs_dim, self._history_len))
         return 0
 
     def observation(self, drone, world):
@@ -71,20 +75,22 @@ class Scenario(BaseScenario):
                 self._obs[0, i] = obs['view']['t_x']
                 self._obs[1, i] = obs['view']['t_y']
                 self._obs[2, i] = obs['view']['size']
-                self._obs[3, i] = obs['drone']['v_fb']
-                self._obs[4, i] = obs['drone']['v_lr']
-                self._obs[5, i] = obs['drone']['v_ud']
-                self._obs[6, i] = obs['drone']['v_a']
+                if FLAGS.obs_with_action:
+                    self._obs[3, i] = obs['drone']['v_fb']
+                    self._obs[4, i] = obs['drone']['v_lr']
+                    self._obs[5, i] = obs['drone']['v_ud']
+                    self._obs[6, i] = obs['drone']['v_a']
 
         else:
             self._obs[0, -1] = obs['view']['t_x']
             self._obs[1, -1] = obs['view']['t_y']
             self._obs[2, -1] = obs['view']['size']
-            self._obs[3, -1] = obs['drone']['v_fb']
-            self._obs[4, -1] = obs['drone']['v_lr']
-            self._obs[5, -1] = obs['drone']['v_ud']
-            self._obs[6, -1] = obs['drone']['v_a']
+            if FLAGS.obs_with_action:
+                self._obs[3, -1] = obs['drone']['v_fb']
+                self._obs[4, -1] = obs['drone']['v_lr']
+                self._obs[5, -1] = obs['drone']['v_ud']
+                self._obs[6, -1] = obs['drone']['v_a']
 
-        ret = np.reshape(self._obs, (self._history_len * 7))  # 7 is the number of obs element
+        ret = np.reshape(self._obs, (self._history_len * self._obs_dim))
 
         return ret
