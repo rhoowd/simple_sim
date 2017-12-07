@@ -56,7 +56,7 @@ class Agent(AgentBase):
         my_graph = tf.Graph()
 
         with my_graph.as_default():
-            self.sess = tf.Session(graph=my_graph)
+            self.sess = tf.Session(graph=my_graph, config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
 
             self.actor_network = ActorNetwork(
                 self.sess, self.obs_dim, self.action_dim,
