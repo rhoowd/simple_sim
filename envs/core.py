@@ -237,7 +237,7 @@ class World(object):
         # == Rendering == #
         if self._render_flag:
             self._render_cnt += 1
-            if self._render_flag == FLAGS.gui_time_step:
+            if self._render_cnt == FLAGS.gui_time_step:
                 self._render_cnt = 0
                 self._render.render(self)
 

@@ -16,7 +16,7 @@ def config_env(_flags):
     flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")
     flags.DEFINE_float("init_position_radius", 8.0, "Initial distance between drone and target")
     flags.DEFINE_boolean("gui_flag", False, "Flag for enable GUI")
-    flags.DEFINE_integer("gui_time_spte", 1, "GUI rendering time step")
+    flags.DEFINE_integer("gui_time_step", 1, "GUI rendering time step")
     flags.DEFINE_float("action_time_step", 0.1, "Action time step, Default we assume drone takes action every 0.1 sec")
 
     # render (gui)
