@@ -6,7 +6,6 @@ import agent
 from envs.config_env import Flags_e
 
 
-
 if __name__ == '__main__':
 
     # === Logging setup === #
@@ -27,4 +26,5 @@ if __name__ == '__main__':
     agent.learn()
 
     env.stop()
+
     print "exit"

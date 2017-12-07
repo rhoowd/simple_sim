@@ -31,17 +31,17 @@ class Env(object):
         self._drones = world.get_drones()
         self._n_drone = world.n_drone
 
-        self._action_dim = 4
-        self._obs_dim = 3
-        self._action_max = np.array([20, 20, 0.2, np.pi/5])      # environment configuration4
-        self._action_min = np.array([-20, -20, -0.2, -np.pi/5])  # environment configuration5
-
         # scenario callbacks
         self.reset_callback = reset_callback
         self.reward_callback = reward_callback
         self.observation_callback = observation_callback
         self.info_callback = info_callback
         self.done_callback = done_callback
+
+        self._action_dim = 4
+        self._obs_dim = np.reshape(self.get_obs(), -1).shape[0] / self._n_drone
+        self._action_max = np.array([20, 20, 0.2, np.pi/5])      # environment configuration4
+        self._action_min = np.array([-20, -20, -0.2, -np.pi/5])  # environment configuration5
 
 
     def step(self, action_n):
