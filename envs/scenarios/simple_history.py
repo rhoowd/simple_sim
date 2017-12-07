@@ -35,7 +35,7 @@ class Scenario(BaseScenario):
         self.pos_max = np.sqrt(2*32**2)*1.5
 
     def reset_world(self, world):
-        BaseScenario.reset_world(world)
+        BaseScenario.reset_world(self, world)
 
         self._obs = -2 * np.ones((7, self._history_len))
         return 0
