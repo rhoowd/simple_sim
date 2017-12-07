@@ -125,10 +125,6 @@ class Agent(AgentBase):
         step = 0
         obs_n = self._env.get_obs()
         obs_single = np.squeeze(obs_n)  # This is for init # TODO  obs_single = np.squeeze(obs_n) is more natural
-        acc_reward = 0
-        prev_reset_step = 0
-        reset_cnt = 0
-        acc_reset_step = 0
 
         while True:
 
@@ -146,7 +142,6 @@ class Agent(AgentBase):
                 if sum(done_n) == self._n_drone:
                     self._env.reset()
                     obs_n = self._env.get_obs()
-                    logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
                 continue
 
             # == DDPG start == #
@@ -169,10 +164,6 @@ class Agent(AgentBase):
                 self._env.reset()
                 obs_n = self._env.get_obs()
                 obs_single = np.squeeze(obs_n)  # This is for init
-                logger.debug('({}/{}) RESET step {}'.format(step, training_step, step - prev_reset_step))
-                reset_cnt += 1
-                acc_reset_step += (step - prev_reset_step)
-                prev_reset_step = step
                 continue
 
             # update network weights to fit a minibatch of experience
@@ -205,21 +196,7 @@ class Agent(AgentBase):
             obs_single = obs_single_next
 
             # == Print progress == #
-            acc_reward += reward_single
-            if step % 1000 == 0:
-                if reset_cnt == 0:
-                    reset_cnt = 1
-                logger.info(
-                    '({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0,
-                                                                         acc_reset_step / reset_cnt))
-                result.info(
-                    '({}/{}) Avg. reward: {}, Avg. reset step {}'.format(step, training_step, acc_reward / 1000.0,
-                                                                         acc_reset_step / reset_cnt))
-
-                acc_reward = 0
-                reset_cnt = 0
-                acc_reset_step = 0
-
+            if step % 10000 == 0:
                 self.saver.save(self.sess, save_file, step)
 
             # == Key board interrupt enable == #

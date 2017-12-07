@@ -15,6 +15,7 @@ Environment Simsim
 """
 import numpy as np
 import logging
+from evaluation import Evaluation
 
 logger = logging.getLogger('Simsim.env')
 
@@ -30,6 +31,7 @@ class Env(object):
         self._world = world
         self._drones = world.get_drones()
         self._n_drone = world.n_drone
+        self._evaluation = Evaluation(world)
 
         # scenario callbacks
         self.reset_callback = reset_callback
@@ -42,7 +44,6 @@ class Env(object):
         self._obs_dim = np.reshape(self.get_obs(), -1).shape[0] / self._n_drone
         self._action_max = np.array([20, 20, 0.2, np.pi/5])      # environment configuration4
         self._action_min = np.array([-20, -20, -0.2, -np.pi/5])  # environment configuration5
-
 
     def step(self, action_n):
         """
@@ -72,10 +73,14 @@ class Env(object):
             done_n.append(self._get_done(drone))
             info_n['n'].append(self._get_info(drone))
 
+        # == Evaluation and progress of training == #
+        self._evaluation.update(reward_n)
+
         return obs_n, reward_n, done_n, info_n
 
     def reset(self):
         self.reset_callback(self._world)
+        self._evaluation.update_reset()
 
     def stop(self):
         self._world.stop()

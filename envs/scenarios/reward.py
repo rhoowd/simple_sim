@@ -90,12 +90,12 @@ class BaseScenario(BS):
 
     def get_size_penalty(self, size):
 
-        if 30 < size <= 250:
-            return (-1./220)*(size - 250)
-        elif 250 < size <= 300:
+        if 50 < size <= 200:
+            return (-1./150)*(size - 200)
+        elif 200 < size <= 250:
             return 0.
-        elif 300 < size < 500:
-            return (1./200)*(size-300)
+        elif 250 < size < 500:
+            return (1./250)*(size-250)
         else:  # size < 30 or size > 500
             return 1.
 
