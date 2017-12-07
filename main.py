@@ -2,9 +2,10 @@
 # coding=utf8
 import logging
 import envs.make_env as make_env
-import agent
-from envs.config_env import Flags_e
+import agents
+import config
 
+FLAGS = config.flags.FLAGS
 
 
 if __name__ == '__main__':
@@ -15,17 +16,18 @@ if __name__ == '__main__':
 
     # === Program start === #
     # Load environment
-    env = make_env.make_env(Flags_e.scenario, Flags_e.n_drone)
-    logger_env.info('Simsim Start with %d drone(s)', Flags_e.n_drone)
+    env = make_env.make_env(FLAGS.scenario, FLAGS.n_drone)
+    logger_env.info('Simsim Start with %d drone(s)', FLAGS.n_drone)
 
     # Load agent
     logger_agent.info("Agent")
-    agent = agent.load("ddpg/ddpg.py").Agent(env)
-    # agent = agent.load("naive/naive.py").Agent(env)
-    # agent = agent.load("keyboard_agent.py").Agent(env)
+    agent = agents.load(FLAGS.agent+"/agent.py").Agent(env)
+
+    print FLAGS.agent, config.file_name
 
     # Start run
     agent.learn()
 
     env.stop()
+
     print "exit"

@@ -1,24 +1,33 @@
 #!/usr/bin/env python
 # coding=utf8
 
+def config_env(_flags):
+    flags = _flags
 
-class Flags_e(object):
+    # Scenario
+    flags.DEFINE_string("scenario", "simple", "Scenario")
 
-    # main
-    n_drone = 1
-    scenario = "simple_history"
+    # Reward
+    flags.DEFINE_string("reward", "reward", "Reward")
 
     # core
-    height_threshold = 3
-    init_position_radius = 8
-    gui_flag = False
-    gui_time_step = 1
-    action_time_step = 0.1
+    flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")
+    flags.DEFINE_float("init_position_radius", 8.0, "Initial distance between drone and target")
+    flags.DEFINE_boolean("gui_flag", False, "Flag for enable GUI")
+    flags.DEFINE_integer("gui_time_spte", 1, "GUI rendering time step")
+    flags.DEFINE_float("action_time_step", 0.1, "Action time step, Default we assume drone takes action every 0.1 sec")
 
     # render (gui)
-    port = 23456
+    flags.DEFINE_integer("gui_port", 23456, "Port number to connect with GUI")
 
     # view
-    view_render_flag = False
-    view_width = 64
-    view_height = 64
+    flags.DEFINE_boolean("view_render_flag", False, "Rendering during calculation in opengl")
+    flags.DEFINE_integer("view_width", 64, "Width of camera view")
+    flags.DEFINE_integer("view_height", 64, "Height of camera view")
+
+
+def get_filename():
+    import config
+    FLAGS = config.flags.FLAGS
+
+    return "s-"+FLAGS.scenario

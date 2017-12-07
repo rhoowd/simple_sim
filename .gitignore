@@ -1,0 +1,5 @@
+*.pyc
+*.txt
+*.log
+result/nn/*
+.idea/

@@ -17,10 +17,11 @@ import json
 import socket
 from threading import Thread
 import time
-from envs.config_env import Flags_e
 from Queue import Queue
-
+import config
 import logging
+
+FLAGS = config.flags.FLAGS
 logger = logging.getLogger('Simsim.render')
 
 INIT = 0
@@ -33,7 +34,7 @@ class Render(Thread):
         Thread.__init__(self)
 
         self._host = ""
-        self._port = Flags_e.port
+        self._port = FLAGS.gui_port
         self._conn = None
         self.running = True
         self._state = INIT

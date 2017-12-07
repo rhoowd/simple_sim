@@ -22,6 +22,8 @@ for all agents. Each element of the list should be a numpy array,
 of size (env.world.dim_p + env.world.dim_c, 1). Physical actions precede
 communication actions in this array. See environment.py for more details.
 """
+import config
+FLAGS = config.flags.FLAGS
 
 
 def make_env(scenario_name, n_drone=1):
@@ -43,7 +45,7 @@ def make_env(scenario_name, n_drone=1):
     world = scenario.make_world(n_drone, scenario.target_move)
 
     # create Simsim environment
-    env = Env(world, scenario.reset_world, scenario.reward_d, scenario.observation, scenario.info, scenario.done)
+    env = Env(world, scenario.reset_world, scenario.get_reward_function(FLAGS.reward), scenario.observation, scenario.info, scenario.done)
 
     return env
 
