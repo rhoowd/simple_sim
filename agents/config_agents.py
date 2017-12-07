@@ -6,7 +6,13 @@ import agents
 def config_agent(_flags):
     flags = _flags
 
-    flags.DEFINE_string("agent", "naive", "Agent")
+    flags.DEFINE_string("agent", "ddpg", "Agent")
+
+    # configurateion for ddpg
+
+    flags.DEFINE_integer("training_step", 400000, "Training time step")
+    flags.DEFINE_boolean("load_nn", False, "Load nn from file or not")
+    flags.DEFINE_integer("minibatch_size", 128, "Minibatch size")
 
 
 def get_filename():

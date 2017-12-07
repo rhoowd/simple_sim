@@ -14,13 +14,14 @@
 Choose action based on ddpg algorithm
 """
 
-from agent.agent import AgentBase
+from agents.agent import AgentBase
 import numpy as np
 import tensorflow as tf
-from agent.ddpg.ac_network import *
+from agents.ddpg.ac_network import *
 import logging
-import agent
+import config
 
+FLAGS = config.flags.FLAGS
 logger = logging.getLogger("Agent")
 result = logging.getLogger('Result')
 
@@ -32,14 +33,12 @@ exploration_theta = 0.15    # theta parameter for the exploration noise process:
 exploration_sigma = 0.2     # sigma parameter for the exploration noise process: dXt = theta*(mu-Xt    )*dt + sigma*dWt
 
 replay_memory_capacity = int(3e4)  # capacity of experience replay memory
-minibatch_size = 128               # size of minibatch from experience replay memory for updates
+minibatch_size = FLAGS.minibatch_size             # size of minibatch from experience replay memory for updates
 
-load_flag = False                        # Use a pre-trained network
-save_file = "result/nn/" + agent.s_time  # Filename for saving the weights during training
+load_flag = FLAGS.load_nn                      # Use a pre-trained network
+save_file = "result/nn/nn-" + config.file_name  # Filename for saving the weights during training
 
-naive_flag = False     # Use naive tracking algorithm
-
-training_step = 400000
+training_step = FLAGS.training_step
 
 
 np.random.seed(0)

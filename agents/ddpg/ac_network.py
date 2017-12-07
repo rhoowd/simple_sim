@@ -5,6 +5,9 @@ import numpy as np
 import tensorflow as tf
 from collections import deque
 import random
+import config
+
+FLAGS = config.flags.FLAGS
 
 gamma = 0.99  # reward discount factor
 
@@ -22,7 +25,7 @@ lr_decay = 1  # learning rate decay (per episode)
 
 tau = 1e-2  # soft target update rate
 replay_memory_capacity = int(3e4)  # capacity of experience replay memory
-minibatch_size = 128  # size of minibatch from experience replay memory for updates
+minibatch_size = FLAGS.minibatch_size  # size of minibatch from experience replay memory for updates
 
 np.set_printoptions(threshold=np.nan)
 

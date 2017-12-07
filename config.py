@@ -10,7 +10,7 @@ import agents.config_agents as config_agent
 flags = tf.flags
 
 # flags for setting
-flags.DEFINE_integer("n_drone", 3, "Number of drones")
+flags.DEFINE_integer("n_drone", 1, "Number of drones")
 
 config_env.config_env(flags)
 config_agent.config_agent(flags)
