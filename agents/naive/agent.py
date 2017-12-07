@@ -25,7 +25,7 @@ class Agent(AgentBase):
         super(Agent, self).__init__(env)
         logger.info("Naive agent is created")
 
-    def act(self, obs, step, drone_id):
+    def act(self, obs, step, drone_id, train=True):
 
         action = [0] * self.action_dim
         x_pos = obs[0]

@@ -26,7 +26,7 @@ if __name__ == '__main__':
     print FLAGS.agent, config.file_name
 
     # Start run
-    agent.learn()
+    agent.learn(FLAGS.train)
 
     env.stop()
 
