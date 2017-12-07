@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # coding=utf8
+import agents
 
 
-def config(_flags):
+def config_agent(_flags):
     flags = _flags
+
+    flags.DEFINE_string("agent", "naive", "Agent")
 
 
 def get_filename():
     import config
     FLAGS = config.flags.FLAGS
 
-    return ""
+    return "a-"+FLAGS.agent
