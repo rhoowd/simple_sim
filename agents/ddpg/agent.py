@@ -51,6 +51,8 @@ class Agent(AgentBase):
         super(Agent, self).__init__(env)
         logger.info("DDPG agent is created")
 
+        print "1", minibatch_size, training_step
+
         tf.reset_default_graph()
         my_graph = tf.Graph()
 

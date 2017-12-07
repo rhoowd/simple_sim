@@ -16,6 +16,9 @@ Environment Simsim
 from envs.scenarios.base_scenario import BaseScenario as BS
 import logging
 import numpy as np
+import config
+
+FLAGS = config.flags.FLAGS
 
 logger = logging.getLogger('Simsim.scenario')
 
@@ -59,8 +62,8 @@ class BaseScenario(BS):
         :param world: world object
         :return: array with t_x, t_y, and size
         """
-        position_weight = 0.5
-        size_weight = 0.5
+        position_weight = FLAGS.position_weight
+        size_weight = FLAGS.size_weight
 
         obs = drone.get_obs()
 

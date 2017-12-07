@@ -47,6 +47,7 @@ class ReplayBuffer:
 class ActorNetwork:
     def __init__(self, sess, state_dim, action_dim, action_min, action_max):
 
+        print "!!", minibatch_size
         self.sess = sess
         self.state_dim = state_dim
         self.action_dim = action_dim

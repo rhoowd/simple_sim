@@ -9,6 +9,8 @@ def config_env(_flags):
 
     # Reward
     flags.DEFINE_string("reward", "reward", "Reward")
+    flags.DEFINE_float("position_weight", 0.5, "The position for size in reward function")
+    flags.DEFINE_float("size_weight", 0.5, "The weight for size in reward function")
 
     # core
     flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")
