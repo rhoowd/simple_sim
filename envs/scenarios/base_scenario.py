@@ -15,7 +15,6 @@ Environment Simsim
 """
 from envs.core import World
 import random
-import numpy as np
 import logging
 
 logger = logging.getLogger('Simsim.scenario')

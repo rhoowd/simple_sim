@@ -22,15 +22,17 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import math
 import numpy as np
-from envs.config_env import Flags_e
 import logging
+import config
+
+FLAGS = config.flags.FLAGS
 logger = logging.getLogger('Simsim.view')
 
 
 class View(object):
     def __init__(self):
-        self._width = Flags_e.view_width
-        self._height = Flags_e.view_height
+        self._width = FLAGS.view_width
+        self._height = FLAGS.view_height
         self._display = (self._width, self._height)
         # phi: camera angle (front: 0, downward: 90, Bug for 90 -> recommend 89 for example)
         self._phi = 45
@@ -41,7 +43,7 @@ class View(object):
 
         # == View rendering flag:
         # This module does not work when this flag is True for rendering image
-        self._view_render_flag = Flags_e.view_render_flag
+        self._view_render_flag = FLAGS.view_render_flag
 
     def get_view(self, dx, dy, dz, da, tx, ty):
         """

@@ -16,9 +16,10 @@ Core module includes World
 import math
 from view import View
 import envs.render as render
-from envs.config_env import Flags_e
-
+import config
 import logging
+
+FLAGS = config.flags.FLAGS
 logger = logging.getLogger('Simsim.core')
 
 
@@ -72,8 +73,8 @@ class Drone(Entity):
         self._obs = dict()
         self._obs['drone'] = dict()
         self._obs['view'] = dict()
-        self._init_position_radius = Flags_e.init_position_radius
-        self._height_threshold = Flags_e.height_threshold
+        self._init_position_radius = FLAGS.init_position_radius
+        self._height_threshold = FLAGS.height_threshold
 
     def get_obs(self):
         return self._obs
@@ -173,7 +174,7 @@ class World(object):
     def __init__(self, n_drone=1, target_movement_callback=None):
 
         self._n_drone = n_drone
-        self._action_time_step = Flags_e.action_time_step
+        self._action_time_step = FLAGS.action_time_step
         self._target = Target()
         self._drones = []
         self._view = View()
@@ -188,7 +189,7 @@ class World(object):
             drone.reset_drone(self._target)
 
         # == Initiate rendering on canvas == #
-        self._render_flag = Flags_e.gui_flag
+        self._render_flag = FLAGS.gui_flag
         if self._render_flag:
             self._render = render.Render()
             self._render.start()
@@ -236,7 +237,7 @@ class World(object):
         # == Rendering == #
         if self._render_flag:
             self._render_cnt += 1
-            if self._render_flag == Flags_e.gui_time_step:
+            if self._render_flag == FLAGS.gui_time_step:
                 self._render_cnt = 0
                 self._render.render(self)
 

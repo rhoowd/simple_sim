@@ -13,7 +13,7 @@
 
 Choose action based on deterministic policy
 """
-from agent.agent import AgentBase
+from agents.agent import AgentBase
 import logging
 
 logger = logging.getLogger("Agent")
