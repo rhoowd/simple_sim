@@ -1,13 +1,30 @@
+#!/usr/bin/env python
+# coding=utf8
+
 import tensorflow as tf
-from envs.config_env import config_env
-from agents.config_agent import config_agent
+import logging
+import time
+import envs.config_env as config_env
+import agents.config_agent as config_agent
 
 flags = tf.flags
 
-config_env(flags)
-config_agent(flags)
+config_env.config_env(flags)
+config_agent.config_agent(flags)
 
 # flags for setting
 flags.DEFINE_integer("n_drone", 3, "Number of drones")
 
 
+file_name = str(flags.FLAGS.n_drone) + "-"
+file_name += config_env.get_filename() + "-" + config_agent.get_filename()
+
+# Make result file with given filename
+now = time.localtime()
+s_time = "%02d%02d%02d%02d%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+result = logging.getLogger('Result')
+result.setLevel(logging.INFO)
+result_fh = logging.FileHandler("./result/eval/r-" + file_name + "-" + s_time + ".txt")
+result_fm = logging.Formatter('[%(filename)s:%(lineno)s] %(asctime)s\t%(message)s')
+result_fh.setFormatter(result_fm)
+result.addHandler(result_fh)

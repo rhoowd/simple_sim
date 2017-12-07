@@ -23,7 +23,7 @@ if __name__ == '__main__':
     logger_agent.info("Agent")
     agent = agents.load(FLAGS.agent+"/agent.py").Agent(env)
 
-    print FLAGS.agent
+    print FLAGS.agent, config.file_name
 
     # Start run
     agent.learn()

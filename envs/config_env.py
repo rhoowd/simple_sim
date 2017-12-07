@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # coding=utf8
 
-
 def config_env(_flags):
     flags = _flags
 
+    # Scenario
     flags.DEFINE_string("scenario", "simple", "Scenario")
+
+    # Reward
+    flags.DEFINE_string("reward", "reward", "Reward")
 
     # core
     flags.DEFINE_float("height_threshold", 3.0, "Height threshold, drone does not fly below this height")
@@ -21,3 +24,10 @@ def config_env(_flags):
     flags.DEFINE_boolean("view_render_flag", False, "Rendering during calculation in opengl")
     flags.DEFINE_integer("view_width", 64, "Width of camera view")
     flags.DEFINE_integer("view_height", 64, "Height of camera view")
+
+
+def get_filename():
+    import config
+    FLAGS = config.flags.FLAGS
+
+    return "s-"+FLAGS.scenario

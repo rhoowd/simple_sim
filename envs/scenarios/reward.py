@@ -45,7 +45,8 @@ class BaseScenario(BS):
         super(BaseScenario, self).__init__()
 
     def get_reward_function(self, reward_function_name=None):
-        if reward_function_name == None:
+        # You can set the reward function in envs/config_env
+        if reward_function_name == "reward":
             return self.reward
 
         return None

@@ -4,3 +4,10 @@
 
 def config(_flags):
     flags = _flags
+
+
+def get_filename():
+    import config
+    FLAGS = config.flags.FLAGS
+
+    return ""
