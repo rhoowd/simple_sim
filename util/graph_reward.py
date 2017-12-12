@@ -16,6 +16,7 @@ if __name__ == '__main__':
     y = []
 
     f = open(filename)
+
     for line in f:
         if line.split("\t")[1].split(" ")[0] == "reward":
             step = line.split("\t")[2]
@@ -25,6 +26,6 @@ if __name__ == '__main__':
             x.append(step)
             y.append(reward)
 
-    print x, y
+    # print x, y
     plt.plot(x, y, 'r-')
     plt.show()
