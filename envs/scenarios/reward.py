@@ -51,7 +51,8 @@ class BaseScenario(BS):
         # You can set the reward function in envs/config_env
         if reward_function_name == "reward":
             return self.reward
-
+        elif reward_function_name == "nfp":
+            return self.reward_no_fail_penalty
         return None
 
     def reward(self, drone, world):
@@ -128,3 +129,24 @@ class BaseScenario(BS):
         ret.append(obs['view']['size'])
 
         return ret
+
+    def reward_no_fail_penalty(self, drone, world):
+        """
+        Basic function for reward with energy and
+
+        :param drone: drone object
+        :param world: world object
+        :return: array with t_x, t_y, and size
+        """
+        position_weight = FLAGS.position_weight
+        size_weight = FLAGS.size_weight
+
+        obs = drone.get_obs()
+
+        size_penalty = self.get_size_penalty(obs['view']['size'])
+        position_penalty = self.get_position_penalty(obs['view']['t_x'], obs['view']['t_x'])
+        lost_target = (obs['view']['t_x'] == -1) * 1
+
+        r = (1 - (position_weight * position_penalty + size_weight * size_penalty)) * (1 - lost_target)
+
+        return r

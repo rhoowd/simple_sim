@@ -40,4 +40,4 @@ def get_filename():
     FLAGS = config.flags.FLAGS
 
     return "s-"+FLAGS.scenario+"-pw-"+str(FLAGS.position_weight)+"-h-"+str(FLAGS.history_len)+\
-           "-oa-"+str(FLAGS.obs_with_action)+"-ft-"+str(FLAGS.fail_threshold)
+           "-oa-"+str(FLAGS.obs_with_action)+"-ft-"+str(FLAGS.fail_threshold)+"-rw-"+str(FLAGS.reward)
