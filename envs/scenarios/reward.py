@@ -69,7 +69,7 @@ class BaseScenario(BS):
         obs = drone.get_obs()
 
         size_penalty = self.get_size_penalty(obs['view']['size'])
-        position_penalty = self.get_position_penalty(obs['view']['t_x'], obs['view']['t_x'])
+        position_penalty = self.get_position_penalty(obs['view']['t_x'], obs['view']['t_y'])
         lost_target = (obs['view']['t_x'] == -1) * 1
 
         r = 1 - (position_weight * position_penalty + size_weight * size_penalty) - lost_target
@@ -144,7 +144,7 @@ class BaseScenario(BS):
         obs = drone.get_obs()
 
         size_penalty = self.get_size_penalty(obs['view']['size'])
-        position_penalty = self.get_position_penalty(obs['view']['t_x'], obs['view']['t_x'])
+        position_penalty = self.get_position_penalty(obs['view']['t_x'], obs['view']['t_y'])
         lost_target = (obs['view']['t_x'] == -1) * 1
 
         r = (1 - (position_weight * position_penalty + size_weight * size_penalty)) * (1 - lost_target)
