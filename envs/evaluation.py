@@ -73,6 +73,7 @@ class Evaluation(object):
 
     def update_reset(self):
         self._reset_cnt += 1
+        self._i_reset_cnt += 1
         return 0
 
     def progress(self):
@@ -83,7 +84,9 @@ class Evaluation(object):
         result.info("reward  \t" + str(self._step) + "\t" + str([x / self._flush_time_step for x in self._i_reward]))
         print str(self._step)+"/400000", "reset cnt:", self._i_reset_cnt, \
             "reward:", [x / self._flush_time_step for x in self._i_reward], \
-            "size:", self._i_trk_size, "error:", self._i_trk_error
+            "size:",  [x / float(self._flush_time_step) for x in self._i_trk_size], \
+            "error:",  [x / self._flush_time_step for x in self._i_trk_error]
+
 
         self._i_reset_cnt = 0
         self._i_trk_error = [0.0] * self._n_drone
