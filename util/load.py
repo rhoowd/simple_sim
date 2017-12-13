@@ -53,7 +53,7 @@ def get_data(w, h, o, f, data, type='reward'):
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        filename = "temp.txt"
+        filename = "temp1.txt"
     else:
         filename = sys.argv[1]
 
@@ -107,11 +107,11 @@ if __name__ == '__main__':
                 data[p_w][history][oa][ft][key] = value1
                 # print step, key, value1, data[p_w][history][oa][ft][key]
 
-    for i in [1, 3, 5, 7]:
-        get_data(None, i, 'True', 1, data)
-
     # for i in [1, 3, 5, 7]:
-    #     get_data(0.6, i, 'True', None, data)
+    #     get_data(None, i, 'True', 1, data)
+
+    for i in [1, 3, 5, 7]:
+        get_data(0.6, i, 'True', None, data)
     #     get_data(0.6, i, 'False', None, data)
     # get_data(0.6, None, True, 1, data)
     # get_data(0.3, 5, None, 1, data)
